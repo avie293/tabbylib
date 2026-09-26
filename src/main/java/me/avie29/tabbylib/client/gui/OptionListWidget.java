@@ -1,5 +1,6 @@
 package me.avie29.tabbylib.client.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.avie29.tabbylib.TabbyLibConfig;
 import me.avie29.tabbylib.api.ActionEntry;
 import me.avie29.tabbylib.api.OptionGroup;
@@ -204,7 +205,7 @@ public class OptionListWidget extends TabbyList<OptionListWidget.Row> {
 
 		@Override
 		public boolean mouseClicked(double mouseX, double mouseY, int button) {
-			if (button == 0) {
+			if (button == InputConstants.MOUSE_BUTTON_LEFT) {
 				this.group.setCollapsed(!this.group.isCollapsed());
 				OptionListWidget.this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 				OptionListWidget.this.screen.rebuildOptions();

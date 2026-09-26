@@ -89,6 +89,7 @@ public abstract class Option<T> implements ConfigEntry {
 		}
 	}
 
+	/** The default value given to the builder. */
 	public T getDefault() {
 		return this.defaultValue;
 	}
@@ -100,19 +101,26 @@ public abstract class Option<T> implements ConfigEntry {
 		return this.editing ? Objects.requireNonNull(this.pending) : this.get();
 	}
 
+	/**
+	 * Changes the pending value, the one shown in the config screen.
+	 * It is applied by {@link #commit()} (the "Save" button).
+	 */
 	public void setPending(T newValue) {
 		this.pending = this.validate(newValue);
 		this.editing = true;
 	}
 
+	/** Sets the pending value back to the default. */
 	public void resetPending() {
 		this.setPending(this.defaultValue);
 	}
 
+	/** Whether the pending value differs from the saved value. */
 	public boolean isDirty() {
 		return this.editing && !this.valueEquals(this.pending, this.get());
 	}
 
+	/** Whether the pending value is the default value. */
 	public boolean isPendingDefault() {
 		return this.valueEquals(this.getPending(), this.defaultValue);
 	}
@@ -127,6 +135,7 @@ public abstract class Option<T> implements ConfigEntry {
 		return changed;
 	}
 
+	/** Forgets the pending value, {@link #getPending()} returns {@link #get()} again. */
 	public void discard() {
 		this.pending = null;
 		this.editing = false;
@@ -134,10 +143,12 @@ public abstract class Option<T> implements ConfigEntry {
 
 	// ---------------------------------------------------------------- meta
 
+	/** Key of the option: its name in the config file and part of its translation key. */
 	public String getKey() {
 		return this.key;
 	}
 
+	/** Display name: the one set with {@link Builder#name}, otherwise the translation of {@link #translationKey()}. */
 	public Component getName() {
 		if (this.customName != null) {
 			return this.customName;
@@ -145,6 +156,10 @@ public abstract class Option<T> implements ConfigEntry {
 		return Component.translatable(this.translationKey());
 	}
 
+	/**
+	 * Tooltip: the one set with {@link Builder#tooltip}, otherwise the translation of
+	 * {@code <translation key>.tooltip} when it exists, else null.
+	 */
 	public @Nullable Component getTooltip() {
 		if (this.customTooltip != null) {
 			return this.customTooltip;
@@ -153,23 +168,28 @@ public abstract class Option<T> implements ConfigEntry {
 		return TranslationHelper.exists(tooltipKey) ? Component.translatable(tooltipKey) : null;
 	}
 
+	/** {@code config.<translation id>.<key>}, see {@link TabbyConfig.Builder#translationId}. */
 	public String translationKey() {
 		String modId = this.config != null ? this.config.getTranslationId() : "unknown";
 		return "config." + modId + "." + this.key;
 	}
 
+	/** False while the {@link Builder#enabledWhen} condition is not met. The screen greys the option out then. */
 	public boolean isEnabled() {
 		return this.enabledWhen == null || this.enabledWhen.getAsBoolean();
 	}
 
+	/** False for hidden options and while the {@link Builder#visibleWhen} condition is not met. */
 	public boolean isVisible() {
 		return !this.hidden && (this.visibleWhen == null || this.visibleWhen.getAsBoolean());
 	}
 
+	/** Whether changing this option needs a game restart, see {@link Builder#requiresRestart()}. */
 	public boolean requiresRestart() {
 		return this.requiresRestart;
 	}
 
+	/** The config this option belongs to, null until it was added to one. */
 	public @Nullable TabbyConfig getConfig() {
 		return this.config;
 	}
@@ -203,6 +223,7 @@ public abstract class Option<T> implements ConfigEntry {
 
 	// ---------------------------------------------------------------- builder
 
+	/** Settings shared by every option type. Each option class has its own builder with extra settings. */
 	@SuppressWarnings("unchecked")
 	public abstract static class Builder<T, B extends Builder<T, B>> {
 		protected final String key;
@@ -280,6 +301,7 @@ public abstract class Option<T> implements ConfigEntry {
 			return this.self();
 		}
 
+		/** Creates the option. Add it to a category or group of a {@link TabbyConfig} afterwards. */
 		public abstract Option<T> build();
 	}
 }
