@@ -14,7 +14,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
 
-/** The "Mod Settings..." button in the vanilla options screen. */
+/** The "Tabby Config..." button in the vanilla options screen. */
 public final class OptionsButton {
 	public static final int WIDTH = Button.DEFAULT_WIDTH * 2 + 8;
 

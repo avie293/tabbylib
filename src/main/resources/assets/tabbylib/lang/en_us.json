@@ -1,6 +1,6 @@
 {
-  "tabbylib.options_button": "Mod Settings...",
-  "tabbylib.screen.title": "Mod Settings",
+  "tabbylib.options_button": "Tabby Config...",
+  "tabbylib.screen.title": "Tabby Config",
   "tabbylib.search": "Search...",
   "tabbylib.search.empty": "No settings match your search.",
   "tabbylib.no_mods": "No mods use TabbyLib yet.",
@@ -38,7 +38,7 @@
   "config.tabbylib.category.hudEditor": "HUD Editor",
   "config.tabbylib.group.appearance": "Appearance",
   "config.tabbylib.optionsButton": "Button in options menu",
-  "config.tabbylib.optionsButton.tooltip": "Shows the 'Mod Settings' button in the options menu. You can always use /tabbylib instead.",
+  "config.tabbylib.optionsButton.tooltip": "Shows the 'Tabby Config' button in the options menu. You can always use /tabbylib instead.",
   "config.tabbylib.confirmUnsaved": "Ask before discarding",
   "config.tabbylib.confirmUnsaved.tooltip": "Asks whether to save when you close the screen with unsaved changes.",
   "config.tabbylib.accentColor": "Accent color",
