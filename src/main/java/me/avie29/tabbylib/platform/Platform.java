@@ -1,35 +1,40 @@
 package me.avie29.tabbylib.platform;
 
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
+import me.avie29.tabbylib.api.TabbyConfig;
+import me.avie29.tabbylib.api.TabbyLibApi;
+import net.minecraftforge.client.ConfigScreenHandler;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.forgespi.language.IModInfo;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
-/** Fabric implementation of the few loader specific things TabbyLib needs. Every loader has its own version of this class. */
+/** Forge implementation of the few loader specific things TabbyLib needs. */
 public final class Platform {
 	private Platform() {
 	}
 
 	public static Path configDir() {
-		return FabricLoader.getInstance().getConfigDir();
+		return FMLPaths.CONFIGDIR.get();
 	}
 
 	public static Optional<ModInfo> mod(String modId) {
-		return FabricLoader.getInstance().getModContainer(modId).map(Platform::toInfo);
+		return ModList.getModContainerById(modId).map(container -> toInfo(container.getModInfo()));
 	}
 
-	/** Fabric has no config button in a mod list of its own (Mod Menu is optional), so nothing to do. */
-	public static void onConfigRegistered(me.avie29.tabbylib.api.TabbyConfig config) {
+	/** Makes the "Config" button in Forge's mod list open the TabbyLib screen. */
+	public static void onConfigRegistered(TabbyConfig config) {
+		ModList.getModContainerById(config.getModId()).ifPresent(container ->
+			container.registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
+				() -> new ConfigScreenHandler.ConfigScreenFactory((minecraft, parent) -> TabbyLibApi.createScreen(parent, config.getModId()))));
 	}
 
-	private static ModInfo toInfo(ModContainer mod) {
-		var metadata = mod.getMetadata();
-		return new ModInfo(metadata.getId(), metadata.getName(), metadata.getVersion().getFriendlyString(),
-			metadata.getIconPath(64), path -> {
-			Optional<Path> file = mod.findPath(path);
-			return file.isPresent() ? Optional.of(Files.newInputStream(file.get())) : Optional.empty();
+	private static ModInfo toInfo(IModInfo info) {
+		return new ModInfo(info.getModId(), info.getDisplayName(), info.getVersion().toString(), info.getLogoFile(), path -> {
+			Path file = info.getOwningFile().getFile().findResource(path);
+			return Files.exists(file) ? Optional.of(Files.newInputStream(file)) : Optional.empty();
 		});
 	}
 }
