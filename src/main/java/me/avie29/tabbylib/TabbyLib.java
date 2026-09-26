@@ -1,5 +1,6 @@
 package me.avie29.tabbylib;
 
+import me.avie29.tabbylib.compat.McCompat;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
@@ -7,7 +8,7 @@ import me.avie29.tabbylib.api.TabbyConfig;
 import me.avie29.tabbylib.api.TabbyLibApi;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +53,7 @@ public final class TabbyLib {
 				}));
 	}
 
-	public static Identifier id(String path) {
-		return Identifier.fromNamespaceAndPath(MOD_ID, path);
+	public static ResourceLocation id(String path) {
+		return McCompat.id(MOD_ID, path);
 	}
 }
