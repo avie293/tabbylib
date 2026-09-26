@@ -3,20 +3,21 @@
 	"id": "tabbylib",
 	"version": "${version}",
 	"name": "TabbyLib",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Config Library for Avies Mods",
 	"authors": [
-		"Me!"
+		"Avie29"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "",
+		"sources": "",
+		"issues": ""
 	},
-	"license": "CC0-1.0",
+	"license": "CC-BY-NC-4.0",
 	"icon": "assets/tabbylib/icon.png",
-	"environment": "*",
+	"environment": "client",
 	"entrypoints": {
-		"main": [
-			"me.avie29.tabbylib.TabbyLib"
+		"client": [
+			"me.avie29.tabbylib.platform.TabbyLibFabric"
 		]
 	},
 	"mixins": [
