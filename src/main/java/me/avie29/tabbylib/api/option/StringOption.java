@@ -20,14 +20,21 @@ public class StringOption extends Option<String> {
 		this.hint = builder.hint;
 	}
 
+	/**
+	 * Starts a new text option.
+	 *
+	 * @param key unique key inside the config, used in the file and in the translation key
+	 */
 	public static Builder builder(String key, String defaultValue) {
 		return new Builder(key, defaultValue);
 	}
 
+	/** Longest allowed text. */
 	public int getMaxLength() {
 		return this.maxLength;
 	}
 
+	/** Grey placeholder shown while the field is empty, or null. */
 	public @Nullable Component getHint() {
 		return this.hint;
 	}
@@ -52,6 +59,7 @@ public class StringOption extends Option<String> {
 		return json.getAsString();
 	}
 
+	/** Builder for {@link StringOption}. The shared settings are in {@link Option.Builder}. */
 	public static class Builder extends Option.Builder<String, Builder> {
 		private int maxLength = 256;
 		private @Nullable Predicate<String> validator;
@@ -61,11 +69,13 @@ public class StringOption extends Option<String> {
 			super(key, defaultValue);
 		}
 
+		/** Limits the length of the text (default 256). */
 		public Builder maxLength(int maxLength) {
 			this.maxLength = maxLength;
 			return this;
 		}
 
+		/** Only text that passes the check is saved; invalid input is shown in red. */
 		public Builder validator(Predicate<String> validator) {
 			this.validator = validator;
 			return this;
