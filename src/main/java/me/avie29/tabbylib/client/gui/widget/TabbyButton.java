@@ -1,5 +1,6 @@
 package me.avie29.tabbylib.client.gui.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -29,12 +30,13 @@ public class TabbyButton extends AbstractButton {
 
 	@Override
 	public void onPress(InputWithModifiers input) {
-		this.onPress.accept(input.input() == 1 || input.hasShiftDown());
+		this.onPress.accept(input.input() == InputConstants.MOUSE_BUTTON_RIGHT || input.hasShiftDown());
 	}
 
 	@Override
 	protected boolean isValidClickButton(MouseButtonInfo buttonInfo) {
-		return buttonInfo.button() == 0 || (this.rightClick && buttonInfo.button() == 1);
+		return buttonInfo.button() == InputConstants.MOUSE_BUTTON_LEFT
+			|| (this.rightClick && buttonInfo.button() == InputConstants.MOUSE_BUTTON_RIGHT);
 	}
 
 	@Override
