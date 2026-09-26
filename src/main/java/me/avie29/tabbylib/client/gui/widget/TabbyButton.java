@@ -1,10 +1,9 @@
 package me.avie29.tabbylib.client.gui.widget;
 
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.input.InputWithModifiers;
-import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
 
 import java.util.function.Consumer;
@@ -28,19 +27,18 @@ public class TabbyButton extends AbstractButton {
 	}
 
 	@Override
-	public void onPress(InputWithModifiers input) {
-		this.onPress.accept(input.input() == 1 || input.hasShiftDown());
+	public void onPress() {
+		this.onPress.accept(Screen.hasShiftDown());
 	}
 
 	@Override
-	protected boolean isValidClickButton(MouseButtonInfo buttonInfo) {
-		return buttonInfo.button() == 0 || (this.rightClick && buttonInfo.button() == 1);
-	}
-
-	@Override
-	protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
-		this.extractDefaultSprite(graphics);
-		this.extractDefaultLabel(graphics.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE));
+	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+		if (button == 1 && this.rightClick && this.active && this.visible && this.isMouseOver(mouseX, mouseY)) {
+			this.playDownSound(Minecraft.getInstance().getSoundManager());
+			this.onPress.accept(true);
+			return true;
+		}
+		return super.mouseClicked(mouseX, mouseY, button);
 	}
 
 	@Override

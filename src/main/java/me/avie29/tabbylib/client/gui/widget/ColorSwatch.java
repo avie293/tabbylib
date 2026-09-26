@@ -1,9 +1,8 @@
 package me.avie29.tabbylib.client.gui.widget;
 
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
 
 import java.util.function.IntSupplier;
@@ -20,12 +19,12 @@ public class ColorSwatch extends AbstractButton {
 	}
 
 	@Override
-	public void onPress(InputWithModifiers input) {
+	public void onPress() {
 		this.onPress.run();
 	}
 
 	@Override
-	protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+	protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
 		int x = this.getX();
 		int y = this.getY();
 		int outline = !this.active ? 0xFF555555 : this.isHoveredOrFocused() ? 0xFFFFFFFF : 0xFFA0A0A0;
@@ -34,12 +33,12 @@ public class ColorSwatch extends AbstractButton {
 	}
 
 	/** Fills a rectangle with the color over a checkerboard, so transparency is visible. */
-	public static void drawColor(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, int argb) {
+	public static void drawColor(GuiGraphics graphics, int x0, int y0, int x1, int y1, int argb) {
 		checkerboard(graphics, x0, y0, x1, y1);
 		graphics.fill(x0, y0, x1, y1, argb);
 	}
 
-	public static void checkerboard(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1) {
+	public static void checkerboard(GuiGraphics graphics, int x0, int y0, int x1, int y1) {
 		int cell = 4;
 		graphics.fill(x0, y0, x1, y1, 0xFFFFFFFF);
 		for (int cy = y0; cy < y1; cy += cell) {

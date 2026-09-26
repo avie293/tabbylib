@@ -7,10 +7,12 @@ import me.avie29.tabbylib.api.option.Option;
 import me.avie29.tabbylib.client.gui.entry.OptionControl;
 import me.avie29.tabbylib.client.gui.entry.OptionControls;
 import me.avie29.tabbylib.client.gui.widget.TabbyButton;
+import me.avie29.tabbylib.compat.McCompat;
+import me.avie29.tabbylib.compat.TabbyList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.Tooltip;
@@ -18,54 +20,54 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/** Scrollable list of option rows on the right side of the config screen. */
-public class OptionListWidget extends ContainerObjectSelectionList<OptionListWidget.Row> {
+/** Scrollable list of option rows on the right side of the config screen (legacy variant, fixed row height). */
+public class OptionListWidget extends TabbyList<OptionListWidget.Row> {
 	public static final int ROW_HEIGHT = 24;
 	private static final int INDENT = 10;
 	private static final int RESET_WIDTH = 20;
+	private static final int LINES_PER_ROW = 2;
 
 	private final TabbyConfigScreen screen;
 
 	public OptionListWidget(Minecraft minecraft, TabbyConfigScreen screen, int x, int y, int width, int height) {
-		super(minecraft, width, height, y, ROW_HEIGHT);
+		super(minecraft, x, y, width, height, ROW_HEIGHT);
 		this.screen = screen;
-		this.setX(x);
-		this.centerListVertically = false;
-	}
-
-	public void clear() {
-		this.clearEntries();
 	}
 
 	public void addOption(Option<?> option, boolean indented) {
-		this.addEntry(new OptionRow(option, OptionControls.create(option, this.screen), indented));
+		this.add(new OptionRow(option, OptionControls.create(option, this.screen), indented));
 	}
 
 	public void addGroup(OptionGroup group) {
-		this.addEntry(new GroupRow(group), 20);
+		this.add(new GroupRow(group));
 	}
 
 	public void addAction(ActionEntry action, boolean indented) {
-		this.addEntry(new ActionRow(action, indented));
+		this.add(new ActionRow(action, indented));
 	}
 
 	public void addHeader(Component text) {
-		this.addEntry(new HeaderRow(text), 16);
+		this.add(new HeaderRow(text));
 	}
 
+	/** Long text is split over several rows, because all rows have the same height here. */
 	public void addText(Component text, boolean indented) {
 		Font font = this.minecraft.font;
 		int wrapWidth = Math.max(40, this.getRowWidth() - 8 - (indented ? INDENT : 0));
 		List<FormattedCharSequence> lines = font.split(text, wrapWidth);
-		this.addEntry(new TextRow(lines, indented), Math.max(12, lines.size() * (font.lineHeight + 1) + 4));
+		for (int i = 0; i < lines.size(); i += LINES_PER_ROW) {
+			this.add(new TextRow(lines.subList(i, Math.min(lines.size(), i + LINES_PER_ROW)), indented));
+		}
 	}
 
 	/** Updates all controls from the pending values (after reset / discard). */
@@ -75,30 +77,6 @@ public class OptionListWidget extends ContainerObjectSelectionList<OptionListWid
 				optionRow.control.refresh();
 			}
 		}
-	}
-
-	@Override
-	public int getRowWidth() {
-		return this.width - 14;
-	}
-
-	@Override
-	public int getRowLeft() {
-		return this.getX() + 4;
-	}
-
-	@Override
-	protected int scrollBarX() {
-		return this.getRight() - 7;
-	}
-
-	@Override
-	protected void extractListBackground(GuiGraphicsExtractor graphics) {
-		// The screen draws the panel
-	}
-
-	@Override
-	protected void extractListSeparators(GuiGraphicsExtractor graphics) {
 	}
 
 	// ---------------------------------------------------------------- rows
@@ -128,11 +106,12 @@ public class OptionListWidget extends ContainerObjectSelectionList<OptionListWid
 		}
 
 		@Override
-		public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovered, float a) {
+		public void render(GuiGraphics graphics, int index, int rowTop, int rowLeft, int rowWidth, int rowHeight,
+						   int mouseX, int mouseY, boolean hovered, float delta) {
 			Font font = OptionListWidget.this.minecraft.font;
-			int left = this.getContentX() + (this.indented ? INDENT : 0);
-			int right = this.getContentRight();
-			int top = this.getY() + 2;
+			int left = rowLeft + (this.indented ? INDENT : 0);
+			int right = rowLeft + rowWidth;
+			int top = rowTop;
 			int height = 20;
 			int controlWidth = Math.min(150, Math.max(80, (right - left) * 45 / 100));
 			int controlX = right - RESET_WIDTH - 2 - controlWidth;
@@ -144,7 +123,7 @@ public class OptionListWidget extends ContainerObjectSelectionList<OptionListWid
 			this.resetButton.active = enabled && !this.option.isPendingDefault();
 
 			if (hovered) {
-				graphics.fill(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), 0x18FFFFFF);
+				graphics.fill(rowLeft - 2, rowTop - 2, right + 2, rowTop + ROW_HEIGHT - 2, 0x18FFFFFF);
 			}
 
 			// Modified marker
@@ -158,16 +137,16 @@ public class OptionListWidget extends ContainerObjectSelectionList<OptionListWid
 			}
 			int labelWidth = controlX - left - 6;
 			int color = !enabled ? 0xFF808080 : this.option.isDirty() ? 0xFFFFE08A : 0xFFFFFFFF;
-			FormattedCharSequence label = clip(font, name, labelWidth);
-			graphics.text(font, label, left + 2, top + (height - 8) / 2, color, true);
+			graphics.drawString(font, clip(font, name, labelWidth), left + 2, top + (height - 8) / 2, color, true);
 
 			for (AbstractWidget widget : this.widgets) {
-				widget.extractRenderState(graphics, mouseX, mouseY, a);
+				widget.render(graphics, mouseX, mouseY, delta);
 			}
 
-			boolean overLabel = mouseX >= left && mouseX < controlX - 4 && mouseY >= this.getY() && mouseY < this.getY() + this.getHeight();
-			if (overLabel) {
-				graphics.setTooltipForNextFrame(font, this.tooltipLines(font), mouseX, mouseY);
+			boolean overLabel = mouseX >= left && mouseX < controlX - 4 && mouseY >= rowTop && mouseY < rowTop + height;
+			Screen current = McCompat.currentScreen();
+			if (overLabel && current != null) {
+				current.setTooltipForNextRenderPass(this.tooltipLines(font));
 			}
 		}
 
@@ -207,26 +186,27 @@ public class OptionListWidget extends ContainerObjectSelectionList<OptionListWid
 		}
 
 		@Override
-		public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovered, float a) {
+		public void render(GuiGraphics graphics, int index, int rowTop, int rowLeft, int rowWidth, int rowHeight,
+						   int mouseX, int mouseY, boolean hovered, float delta) {
 			Font font = OptionListWidget.this.minecraft.font;
-			int x = this.getContentX();
-			int y = this.getY();
 			int accent = TabbyLibConfig.accentColor();
-			graphics.fill(x, y + this.getHeight() - 3, this.getContentRight(), y + this.getHeight() - 2, (accent & 0x00FFFFFF) | 0x80000000);
+			int lineY = rowTop + rowHeight - 1;
+			graphics.fill(rowLeft, lineY, rowLeft + rowWidth, lineY + 1, (accent & 0x00FFFFFF) | 0x80000000);
 			String arrow = this.group.isCollapsed() ? "▶ " : "▼ ";
 			Component text = Component.literal(arrow).withStyle(style -> style.withColor(accent & 0xFFFFFF))
 				.append(this.group.getName().copy().withStyle(ChatFormatting.BOLD));
-			graphics.text(font, text, x + 2, y + 6, hovered ? 0xFFFFFFFF : 0xFFE0E0E0, true);
-			if (hovered && this.group.getDescription() != null) {
-				graphics.setTooltipForNextFrame(font, font.split(this.group.getDescription(), 220), mouseX, mouseY);
+			graphics.drawString(font, text, rowLeft + 2, rowTop + 6, hovered ? 0xFFFFFFFF : 0xFFE0E0E0, true);
+			Screen current = McCompat.currentScreen();
+			if (hovered && this.group.getDescription() != null && current != null) {
+				current.setTooltipForNextRenderPass(font.split(this.group.getDescription(), 220));
 			}
 		}
 
 		@Override
-		public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-			if (event.button() == 0) {
+		public boolean mouseClicked(double mouseX, double mouseY, int button) {
+			if (button == 0) {
 				this.group.setCollapsed(!this.group.isCollapsed());
-				AbstractWidget.playButtonClickSound(OptionListWidget.this.minecraft.getSoundManager());
+				OptionListWidget.this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 				OptionListWidget.this.screen.rebuildOptions();
 				return true;
 			}
@@ -259,16 +239,16 @@ public class OptionListWidget extends ContainerObjectSelectionList<OptionListWid
 		}
 
 		@Override
-		public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovered, float a) {
+		public void render(GuiGraphics graphics, int index, int rowTop, int rowLeft, int rowWidth, int rowHeight,
+						   int mouseX, int mouseY, boolean hovered, float delta) {
 			Font font = OptionListWidget.this.minecraft.font;
-			int left = this.getContentX() + (this.indented ? INDENT : 0);
-			int right = this.getContentRight();
-			int top = this.getY() + 2;
+			int left = rowLeft + (this.indented ? INDENT : 0);
+			int right = rowLeft + rowWidth;
 			int buttonWidth = Math.min(150, Math.max(80, (right - left) * 45 / 100)) + RESET_WIDTH + 2;
 			int buttonX = right - buttonWidth;
-			this.button.setRectangle(buttonWidth, 20, buttonX, top);
-			graphics.text(font, clip(font, this.action.name(), buttonX - left - 6), left + 2, top + 6, 0xFFFFFFFF, true);
-			this.button.extractRenderState(graphics, mouseX, mouseY, a);
+			McCompat.setBounds(this.button, buttonX, rowTop, buttonWidth, 20);
+			graphics.drawString(font, clip(font, this.action.name(), buttonX - left - 6), left + 2, rowTop + 6, 0xFFFFFFFF, true);
+			this.button.render(graphics, mouseX, mouseY, delta);
 		}
 
 		@Override
@@ -290,9 +270,10 @@ public class OptionListWidget extends ContainerObjectSelectionList<OptionListWid
 		}
 
 		@Override
-		public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovered, float a) {
+		public void render(GuiGraphics graphics, int index, int rowTop, int rowLeft, int rowWidth, int rowHeight,
+						   int mouseX, int mouseY, boolean hovered, float delta) {
 			Font font = OptionListWidget.this.minecraft.font;
-			graphics.text(font, this.text, this.getContentX() + 2, this.getY() + 5, TabbyLibConfig.accentColor(), true);
+			graphics.drawString(font, this.text, rowLeft + 2, rowTop + 8, TabbyLibConfig.accentColor(), true);
 		}
 
 		@Override
@@ -311,17 +292,18 @@ public class OptionListWidget extends ContainerObjectSelectionList<OptionListWid
 		private final boolean indented;
 
 		TextRow(List<FormattedCharSequence> lines, boolean indented) {
-			this.lines = lines;
+			this.lines = List.copyOf(lines);
 			this.indented = indented;
 		}
 
 		@Override
-		public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovered, float a) {
+		public void render(GuiGraphics graphics, int index, int rowTop, int rowLeft, int rowWidth, int rowHeight,
+						   int mouseX, int mouseY, boolean hovered, float delta) {
 			Font font = OptionListWidget.this.minecraft.font;
-			int x = this.getContentX() + 2 + (this.indented ? INDENT : 0);
-			int y = this.getY() + 2;
+			int x = rowLeft + 2 + (this.indented ? INDENT : 0);
+			int y = rowTop + 1;
 			for (FormattedCharSequence line : this.lines) {
-				graphics.text(font, line, x, y, 0xFFB0B0B0, false);
+				graphics.drawString(font, line, x, y, 0xFFB0B0B0, false);
 				y += font.lineHeight + 1;
 			}
 		}
@@ -364,5 +346,4 @@ public class OptionListWidget extends ContainerObjectSelectionList<OptionListWid
 			output.add(NarratedElementType.TITLE, this.text);
 		}
 	}
-
 }

@@ -14,17 +14,16 @@ import me.avie29.tabbylib.client.gui.entry.OptionControls;
 import me.avie29.tabbylib.client.gui.widget.FlatTab;
 import me.avie29.tabbylib.client.gui.widget.TabbyButton;
 import me.avie29.tabbylib.compat.McCompat;
+import me.avie29.tabbylib.compat.TabbyScreen;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.Util;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Util;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -32,9 +31,9 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * The TabbyLib config screen: mod list on the left, the options of the selected mod on the right.
+ * The TabbyLib config screen: mod list on the left, the options of the selected mod on the right (legacy variant).
  */
-public class TabbyConfigScreen extends Screen {
+public class TabbyConfigScreen extends TabbyScreen {
 	private static final int MARGIN = 8;
 	private static final int GAP = 4;
 	private static final int TOP = 24;
@@ -75,7 +74,7 @@ public class TabbyConfigScreen extends Screen {
 			this.selected = TabbyLibApi.getConfig(modId);
 		}
 		if (this.selected == null && !this.configs.isEmpty()) {
-			this.selected = this.configs.getFirst();
+			this.selected = this.configs.get(0);
 		}
 	}
 
@@ -99,7 +98,7 @@ public class TabbyConfigScreen extends Screen {
 		int searchWidth = Math.min(130, this.contentWidth / 3);
 		this.searchBox = new EditBox(this.font, this.contentX + this.contentWidth - searchWidth - 6, this.panelY + 5, searchWidth, 16,
 			Component.translatable("tabbylib.search"));
-		this.searchBox.setHint(Component.translatable("tabbylib.search").withStyle(EditBox.SEARCH_HINT_STYLE));
+		this.searchBox.setHint(Component.translatable("tabbylib.search").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 		this.searchBox.setValue(this.search);
 		this.searchBox.setResponder(text -> {
 			this.search = text;
@@ -108,7 +107,7 @@ public class TabbyConfigScreen extends Screen {
 		});
 		this.addRenderableWidget(this.searchBox);
 
-		this.optionList = new OptionListWidget(this.minecraft, this, this.contentX + 2, 0, this.contentWidth - 4, 10);
+		this.optionList = new OptionListWidget(this.minecraft, this, this.contentX + 2, this.panelY + 25, this.contentWidth - 4, 10);
 		this.addRenderableWidget(this.optionList);
 
 		// Footer buttons
@@ -135,7 +134,7 @@ public class TabbyConfigScreen extends Screen {
 		}
 		this.rebuildTabs();
 		this.rebuildOptions();
-		this.optionList.setScrollAmount(this.restoreScroll);
+		this.optionList.setScroll(this.restoreScroll);
 		this.restoreScroll = 0;
 	}
 
@@ -146,7 +145,7 @@ public class TabbyConfigScreen extends Screen {
 			this.rebuildTabs();
 			this.rebuildOptions();
 			if (this.optionList != null) {
-				this.optionList.setScrollAmount(0);
+				this.optionList.setScroll(0);
 			}
 		}
 	}
@@ -159,7 +158,7 @@ public class TabbyConfigScreen extends Screen {
 		}
 		List<ConfigCategory> categories = this.selected.getCategories();
 		if (this.selectedCategory == null || !categories.contains(this.selectedCategory)) {
-			this.selectedCategory = categories.getFirst();
+			this.selectedCategory = categories.get(0);
 		}
 		if (categories.size() > 1 && this.search.isBlank()) {
 			int x = this.contentX + 6;
@@ -171,7 +170,7 @@ public class TabbyConfigScreen extends Screen {
 					this.selectedCategory = category;
 					this.rebuildOptions();
 					if (this.optionList != null) {
-						this.optionList.setScrollAmount(0);
+						this.optionList.setScroll(0);
 					}
 				});
 				tab.setPosition(x, this.panelY + 24);
@@ -190,9 +189,9 @@ public class TabbyConfigScreen extends Screen {
 		if (this.optionList == null) {
 			return;
 		}
-		double scroll = this.optionList.scrollAmount();
+		double scroll = this.optionList.scroll();
 		int top = this.optionListTop();
-		this.optionList.updateSizeAndPosition(this.contentWidth - 4, this.panelBottom - top - 3, this.contentX + 2, top);
+		this.optionList.setBounds(this.contentX + 2, top, this.contentWidth - 4, this.panelBottom - top - 3);
 		this.optionList.clear();
 		this.visibilitySignature = this.computeVisibilitySignature();
 
@@ -207,27 +206,24 @@ public class TabbyConfigScreen extends Screen {
 		} else if (this.selectedCategory != null) {
 			this.addEntries(this.selectedCategory.getEntries(), false);
 		}
-		this.optionList.setScrollAmount(scroll);
+		this.optionList.setScroll(scroll);
 	}
 
 	private void addEntries(List<ConfigEntry> entries, boolean indented) {
 		for (ConfigEntry entry : entries) {
-			switch (entry) {
-				case Option<?> option -> {
-					if (option.isVisible()) {
-						this.optionList.addOption(option, indented);
-					}
+			if (entry instanceof Option<?> option) {
+				if (option.isVisible()) {
+					this.optionList.addOption(option, indented);
 				}
-				case OptionGroup group -> {
-					this.optionList.addGroup(group);
-					if (!group.isCollapsed()) {
-						this.addEntries(group.getEntries(), true);
-					}
+			} else if (entry instanceof OptionGroup group) {
+				this.optionList.addGroup(group);
+				if (!group.isCollapsed()) {
+					this.addEntries(group.getEntries(), true);
 				}
-				case LabelEntry label -> this.optionList.addText(label.text(), indented);
-				case ActionEntry action -> this.optionList.addAction(action, indented);
-				default -> {
-				}
+			} else if (entry instanceof LabelEntry label) {
+				this.optionList.addText(label.text(), indented);
+			} else if (entry instanceof ActionEntry action) {
+				this.optionList.addAction(action, indented);
 			}
 		}
 	}
@@ -322,7 +318,7 @@ public class TabbyConfigScreen extends Screen {
 	}
 
 	private void rememberScroll() {
-		this.restoreScroll = this.optionList != null ? this.optionList.scrollAmount() : 0;
+		this.restoreScroll = this.optionList != null ? this.optionList.scroll() : 0;
 	}
 
 	private void showStatus(Component message) {
@@ -389,58 +385,59 @@ public class TabbyConfigScreen extends Screen {
 	}
 
 	@Override
-	public boolean keyPressed(KeyEvent event) {
+	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
 		if (this.capturingKey != null) {
-			this.finishKeyCapture(event.isEscape() ? InputConstants.UNKNOWN : InputConstants.getKey(event));
+			this.finishKeyCapture(keyCode == InputConstants.KEY_ESCAPE ? InputConstants.UNKNOWN : InputConstants.getKey(keyCode, scanCode));
 			return true;
 		}
 		// Ctrl + F focuses the search
-		if (event.input() == InputConstants.KEY_F && event.hasControlDown() && this.searchBox != null) {
+		if (keyCode == InputConstants.KEY_F && Screen.hasControlDown() && this.searchBox != null) {
 			this.setFocused(this.searchBox);
 			return true;
 		}
 		// Ctrl + S saves
-		if (event.input() == InputConstants.KEY_S && event.hasControlDown()) {
+		if (keyCode == InputConstants.KEY_S && Screen.hasControlDown()) {
 			this.saveAll();
 			return true;
 		}
-		return super.keyPressed(event);
+		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 
 	@Override
-	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		if (this.capturingKey != null) {
-			this.finishKeyCapture(InputConstants.Type.MOUSE.getOrCreate(event.button()));
+			this.finishKeyCapture(InputConstants.Type.MOUSE.getOrCreate(button));
 			return true;
 		}
-		return super.mouseClicked(event, doubleClick);
+		return super.mouseClicked(mouseX, mouseY, button);
 	}
 
 	// ---------------------------------------------------------------- rendering
 
 	@Override
-	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+	protected void renderContent(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
 		Panel.draw(graphics, this.listX, this.panelY, this.listWidth, this.panelBottom - this.panelY);
 		Panel.draw(graphics, this.contentX, this.panelY, this.contentWidth, this.panelBottom - this.panelY);
 
-		graphics.centeredText(this.font, this.title, this.width / 2, 8, 0xFFFFFFFF);
+		graphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFFFFFFF);
 
 		if (this.selected != null) {
 			int accent = TabbyLibConfig.accentColor();
 			int titleMaxWidth = this.contentWidth - (this.searchBox != null ? this.searchBox.getWidth() : 0) - 20;
-			graphics.text(this.font, OptionListWidget.clip(this.font, this.selected.getDisplayName().copy().withStyle(ChatFormatting.BOLD), titleMaxWidth),
+			graphics.drawString(this.font, OptionListWidget.clip(this.font, this.selected.getDisplayName().copy().withStyle(ChatFormatting.BOLD), titleMaxWidth),
 				this.contentX + 7, this.panelY + 9, accent, true);
 			int lineY = this.optionListTop() - 2;
 			graphics.fill(this.contentX + 4, lineY, this.contentX + this.contentWidth - 4, lineY + 1, 0x40FFFFFF);
 		}
+	}
 
-		super.extractRenderState(graphics, mouseX, mouseY, a);
-
+	@Override
+	protected void renderForeground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
 		if (this.statusMessage != null) {
 			if (Util.getMillis() < this.statusUntil) {
 				int textWidth = this.font.width(this.statusMessage);
 				int x = this.contentX + this.contentWidth - textWidth;
-				graphics.text(this.font, this.statusMessage, x, 8, 0xFFFFFFFF, true);
+				graphics.drawString(this.font, this.statusMessage, x, 8, 0xFFFFFFFF, true);
 			} else {
 				this.statusMessage = null;
 			}
