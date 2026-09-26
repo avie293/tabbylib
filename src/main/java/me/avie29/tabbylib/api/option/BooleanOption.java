@@ -16,6 +16,11 @@ public class BooleanOption extends Option<Boolean> {
 		this.falseText = builder.falseText;
 	}
 
+	/**
+	 * Starts a new toggle.
+	 *
+	 * @param key unique key inside the config, used in the file and in the translation key
+	 */
 	public static Builder builder(String key, boolean defaultValue) {
 		return new Builder(key, defaultValue);
 	}
@@ -43,6 +48,7 @@ public class BooleanOption extends Option<Boolean> {
 		return json.getAsBoolean();
 	}
 
+	/** Builder for {@link BooleanOption}. The shared settings are in {@link Option.Builder}. */
 	public static class Builder extends Option.Builder<Boolean, Builder> {
 		private @Nullable Component trueText;
 		private @Nullable Component falseText;
@@ -51,6 +57,7 @@ public class BooleanOption extends Option<Boolean> {
 			super(key, defaultValue);
 		}
 
+		/** Text on the button instead of "On" / "Off", e.g. "Shown" / "Hidden". */
 		public Builder valueText(Component trueText, Component falseText) {
 			this.trueText = trueText;
 			this.falseText = falseText;

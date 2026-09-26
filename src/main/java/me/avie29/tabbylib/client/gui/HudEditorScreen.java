@@ -160,7 +160,7 @@ public class HudEditorScreen extends TabbyScreen {
 
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		if (button == 0 && this.isOverElement(mouseX, mouseY)) {
+		if (button == InputConstants.MOUSE_BUTTON_LEFT && this.isOverElement(mouseX, mouseY)) {
 			this.dragging = true;
 			this.dragOffsetX = (int) mouseX - this.elementX();
 			this.dragOffsetY = (int) mouseY - this.elementY();
@@ -185,7 +185,7 @@ public class HudEditorScreen extends TabbyScreen {
 
 	@Override
 	public boolean mouseReleased(double mouseX, double mouseY, int button) {
-		if (this.dragging && button == 0) {
+		if (this.dragging && button == InputConstants.MOUSE_BUTTON_LEFT) {
 			this.dragging = false;
 			this.guideHorizontal = false;
 			this.guideVertical = false;

@@ -1,5 +1,6 @@
 package me.avie29.tabbylib.client.gui.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.screens.Screen;
@@ -33,7 +34,7 @@ public class TabbyButton extends AbstractButton {
 
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		if (button == 1 && this.rightClick && this.active && this.visible && this.isMouseOver(mouseX, mouseY)) {
+		if (button == InputConstants.MOUSE_BUTTON_RIGHT && this.rightClick && this.active && this.visible && this.isMouseOver(mouseX, mouseY)) {
 			this.playDownSound(Minecraft.getInstance().getSoundManager());
 			this.onPress.accept(true);
 			return true;
