@@ -1,8 +1,6 @@
 modLoader="javafml"
 loaderVersion="${forge_version_range}"
 license="CC-BY-NC-4.0"
-issueTrackerURL="https://github.com/avie293/tabbylib/issues"
-
 
 [[mods]]
 modId="${mod_id}"
@@ -11,7 +9,6 @@ displayName="TabbyLib"
 authors="Avie29"
 description='''Config Library for Avies Mods'''
 logoFile="assets/tabbylib/icon.png"
-displayURL="https://avie29.me/"
 
 [[dependencies.${mod_id}]]
 modId="forge"

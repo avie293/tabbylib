@@ -11,7 +11,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The few Minecraft calls that differ between versions (1.21.1 variant). Each Minecraft version gets its own
- * copy of the compat package (see tools/ports.py), everything else stays identical.
+ * copy of the compat package (see tools/ports.py), everything else stays identical. Internal, not part of the API.
  */
 public final class McCompat {
 	private McCompat() {

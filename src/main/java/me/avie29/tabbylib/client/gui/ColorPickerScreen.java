@@ -1,5 +1,6 @@
 package me.avie29.tabbylib.client.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.avie29.tabbylib.api.option.ColorOption;
 import me.avie29.tabbylib.client.gui.widget.ColorSwatch;
 import me.avie29.tabbylib.client.gui.widget.TabbyButton;
@@ -177,7 +178,7 @@ public class ColorPickerScreen extends TabbyScreen {
 
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		if (button == 0) {
+		if (button == InputConstants.MOUSE_BUTTON_LEFT) {
 			int top = this.squareY();
 			if (mouseY >= top && mouseY < top + SQUARE) {
 				if (mouseX >= this.squareX() && mouseX < this.squareX() + SQUARE) {
