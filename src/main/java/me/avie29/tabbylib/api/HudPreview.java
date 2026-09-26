@@ -1,6 +1,6 @@
 package me.avie29.tabbylib.api;
 
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 
 /**
  * Draws a HUD element inside the TabbyLib HUD editor. Usually you just call your normal HUD
@@ -17,5 +17,5 @@ public interface HudPreview {
 	int height();
 
 	/** Draws the element with its top left corner at x, y. */
-	void render(GuiGraphicsExtractor graphics, int x, int y);
+	void render(GuiGraphics graphics, int x, int y);
 }

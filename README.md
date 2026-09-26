@@ -27,11 +27,11 @@ repositories {
 }
 dependencies {
 	// Fabric (1.21.1: modImplementation)
-	implementation "me.avie29.tabbylib:tabbylib:1.0.0+26.1"
+	implementation "me.avie29.tabbylib:tabbylib:1.0.0+1.20.1"
 	// NeoForge
-	implementation "me.avie29.tabbylib:tabbylib-neoforge:1.0.0+26.1"
+	implementation "me.avie29.tabbylib:tabbylib-neoforge:1.0.0+1.20.1"
 	// Forge (1.20.1: implementation fg.deobf("..."))
-	implementation "me.avie29.tabbylib:tabbylib-forge:1.0.0+26.1"
+	implementation "me.avie29.tabbylib:tabbylib-forge:1.0.0+1.20.1"
 }
 ```
 Add TabbyLib as dependency: `"tabbylib": ">=1.0.0"` in `fabric.mod.json` (`depends`), or a `[[dependencies.<modid>]]`

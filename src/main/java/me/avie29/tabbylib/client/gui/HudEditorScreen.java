@@ -1,26 +1,26 @@
 package me.avie29.tabbylib.client.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.avie29.tabbylib.TabbyLibConfig;
 import me.avie29.tabbylib.api.HudPosition;
 import me.avie29.tabbylib.api.HudPreview;
 import me.avie29.tabbylib.api.option.HudPositionOption;
 import me.avie29.tabbylib.client.gui.widget.TabbyButton;
 import me.avie29.tabbylib.compat.McCompat;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import me.avie29.tabbylib.compat.TabbyScreen;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
 /**
- * Drag and drop editor for a {@link HudPositionOption}.
+ * Drag and drop editor for a {@link HudPositionOption} (legacy variant).
  * Snaps to the screen edges, the center and a grid. Hold Alt while dragging to place freely,
  * use the arrow keys to move by 1 pixel (10 with Shift).
  */
-public class HudEditorScreen extends Screen {
+public class HudEditorScreen extends TabbyScreen {
 	private static final int GUIDE_COLOR = 0x8033CCFF;
 	private static boolean open;
 
@@ -102,11 +102,6 @@ public class HudEditorScreen extends Screen {
 		return false;
 	}
 
-	@Override
-	public boolean isInGameUi() {
-		return this.minecraft.level != null;
-	}
-
 	// ---------------------------------------------------------------- position helpers
 
 	private int elementX() {
@@ -164,67 +159,67 @@ public class HudEditorScreen extends Screen {
 	// ---------------------------------------------------------------- input
 
 	@Override
-	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		if (event.button() == 0 && this.isOverElement(event.x(), event.y())) {
+	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+		if (button == 0 && this.isOverElement(mouseX, mouseY)) {
 			this.dragging = true;
-			this.dragOffsetX = (int) event.x() - this.elementX();
-			this.dragOffsetY = (int) event.y() - this.elementY();
+			this.dragOffsetX = (int) mouseX - this.elementX();
+			this.dragOffsetY = (int) mouseY - this.elementY();
 			return true;
 		}
-		return super.mouseClicked(event, doubleClick);
+		return super.mouseClicked(mouseX, mouseY, button);
 	}
 
 	@Override
-	public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+	public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
 		if (this.dragging) {
-			boolean free = event.hasAltDown();
+			boolean free = Screen.hasAltDown();
 			int maxX = Math.max(0, this.width - this.preview.width());
 			int maxY = Math.max(0, this.height - this.preview.height());
-			int x = this.snap((int) event.x() - this.dragOffsetX, maxX, false, free);
-			int y = this.snap((int) event.y() - this.dragOffsetY, maxY, true, free);
+			int x = this.snap((int) mouseX - this.dragOffsetX, maxX, false, free);
+			int y = this.snap((int) mouseY - this.dragOffsetY, maxY, true, free);
 			this.moveTo(x, y);
 			return true;
 		}
-		return super.mouseDragged(event, dx, dy);
+		return super.mouseDragged(mouseX, mouseY, button, dx, dy);
 	}
 
 	@Override
-	public boolean mouseReleased(MouseButtonEvent event) {
-		if (this.dragging && event.button() == 0) {
+	public boolean mouseReleased(double mouseX, double mouseY, int button) {
+		if (this.dragging && button == 0) {
 			this.dragging = false;
 			this.guideHorizontal = false;
 			this.guideVertical = false;
 			return true;
 		}
-		return super.mouseReleased(event);
+		return super.mouseReleased(mouseX, mouseY, button);
 	}
 
 	@Override
-	public boolean keyPressed(KeyEvent event) {
-		int step = event.hasShiftDown() ? 10 : 1;
-		int dx = event.isLeft() ? -step : event.isRight() ? step : 0;
-		int dy = event.isUp() ? -step : event.isDown() ? step : 0;
+	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+		int step = Screen.hasShiftDown() ? 10 : 1;
+		int dx = keyCode == InputConstants.KEY_LEFT ? -step : keyCode == InputConstants.KEY_RIGHT ? step : 0;
+		int dy = keyCode == InputConstants.KEY_UP ? -step : keyCode == InputConstants.KEY_DOWN ? step : 0;
 		if (dx != 0 || dy != 0) {
 			this.moveTo(this.elementX() + dx, this.elementY() + dy);
 			return true;
 		}
-		return super.keyPressed(event);
+		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 
 	// ---------------------------------------------------------------- rendering
 
 	@Override
-	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+	protected void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
 		if (this.minecraft.level != null) {
 			// Keep the world visible so the element can be placed in context
 			graphics.fill(0, 0, this.width, this.height, 0x30000000);
 		} else {
-			super.extractBackground(graphics, mouseX, mouseY, a);
+			super.drawBackground(graphics, mouseX, mouseY, delta);
 		}
 	}
 
 	@Override
-	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+	protected void renderContent(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
 		if (TabbyLibConfig.SHOW_GRID.get() && TabbyLibConfig.SNAP_GRID.get()) {
 			int grid = TabbyLibConfig.GRID_SIZE.get();
 			for (int x = grid; x < this.width; x += grid) {
@@ -253,12 +248,10 @@ public class HudEditorScreen extends Screen {
 
 		this.preview.render(graphics, x, y);
 		boolean hovered = this.dragging || this.isOverElement(mouseX, mouseY);
-		graphics.outline(x - 1, y - 1, w + 2, h + 2, hovered ? 0xFFFFFFFF : TabbyLibConfig.accentColor());
+		graphics.renderOutline(x - 1, y - 1, w + 2, h + 2, hovered ? 0xFFFFFFFF : TabbyLibConfig.accentColor());
 
-		graphics.centeredText(this.font, this.title, this.width / 2, 12, 0xFFFFFFFF);
-		graphics.centeredText(this.font, Component.translatable("tabbylib.hud.hint"), this.width / 2, 24, 0xFFAAAAAA);
-		graphics.centeredText(this.font, Component.literal(this.option.formatValue(this.option.getPending())), this.width / 2, this.height - 40, 0xFF808080);
-
-		super.extractRenderState(graphics, mouseX, mouseY, a);
+		graphics.drawCenteredString(this.font, this.title, this.width / 2, 12, 0xFFFFFFFF);
+		graphics.drawCenteredString(this.font, Component.translatable("tabbylib.hud.hint"), this.width / 2, 24, 0xFFAAAAAA);
+		graphics.drawCenteredString(this.font, Component.literal(this.option.formatValue(this.option.getPending())), this.width / 2, this.height - 40, 0xFF808080);
 	}
 }

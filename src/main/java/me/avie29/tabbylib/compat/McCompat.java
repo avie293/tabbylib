@@ -1,14 +1,17 @@
 package me.avie29.tabbylib.compat;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.resources.ResourceLocation;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The few Minecraft calls that differ between versions. Each Minecraft version gets its own copy of this
- * class (see tools/sync_ports.py), everything else stays identical.
+ * The few Minecraft calls that differ between versions (1.20.1 variant). Each Minecraft version gets its own
+ * copy of the compat package (see tools/ports.py), everything else stays identical.
  */
 public final class McCompat {
 	private McCompat() {
@@ -22,12 +25,24 @@ public final class McCompat {
 		return Minecraft.getInstance().screen;
 	}
 
+	public static ResourceLocation id(String namespace, String path) {
+		return new ResourceLocation(namespace, path);
+	}
+
+	public static DynamicTexture texture(NativeImage image) {
+		return new DynamicTexture(image);
+	}
+
+	/** Widgets can not change their height in this version, all TabbyLib widgets are created with the right one. */
 	public static void setBounds(AbstractWidget widget, int x, int y, int width, int height) {
-		widget.setRectangle(width, height, x, y);
+		widget.setX(x);
+		widget.setY(y);
+		widget.setWidth(width);
 	}
 
 	/** Scrolls a text field back to the start of its text. */
 	public static void resetCursor(EditBox box) {
-		box.moveCursorToStart(false);
+		box.setCursorPosition(0);
+		box.setHighlightPos(0);
 	}
 }
