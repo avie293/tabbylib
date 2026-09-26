@@ -10,7 +10,7 @@ import me.avie29.tabbylib.api.option.Option;
 import me.avie29.tabbylib.platform.ModInfo;
 import me.avie29.tabbylib.platform.Platform;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
@@ -53,7 +53,7 @@ public final class TabbyConfig {
 	private final List<Runnable> saveListeners;
 	private final List<Predicate<JsonObject>> migrations;
 	private final @Nullable Component customName;
-	private final @Nullable Identifier customIcon;
+	private final @Nullable ResourceLocation customIcon;
 	private final Map<String, Option<?>> optionsByKey = new LinkedHashMap<>();
 
 	private TabbyConfig(Builder builder) {
@@ -107,7 +107,7 @@ public final class TabbyConfig {
 		return this.modInfo().map(ModInfo::version).orElse("");
 	}
 
-	public @Nullable Identifier getCustomIcon() {
+	public @Nullable ResourceLocation getCustomIcon() {
 		return this.customIcon;
 	}
 
@@ -289,7 +289,7 @@ public final class TabbyConfig {
 		private final List<Runnable> saveListeners = new ArrayList<>();
 		private final List<Predicate<JsonObject>> migrations = new ArrayList<>();
 		private @Nullable Component name;
-		private @Nullable Identifier icon;
+		private @Nullable ResourceLocation icon;
 
 		private Builder(String modId) {
 			this.modId = modId;
@@ -319,7 +319,7 @@ public final class TabbyConfig {
 		}
 
 		/** Overrides the icon (a texture, e.g. {@code mymod:textures/gui/icon.png}). Defaults to the icon of fabric.mod.json. */
-		public Builder icon(Identifier icon) {
+		public Builder icon(ResourceLocation icon) {
 			this.icon = icon;
 			return this;
 		}

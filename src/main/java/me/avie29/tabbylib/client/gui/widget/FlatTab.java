@@ -3,10 +3,9 @@ package me.avie29.tabbylib.client.gui.widget;
 import me.avie29.tabbylib.TabbyLibConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
 
 import java.util.function.BooleanSupplier;
@@ -23,12 +22,12 @@ public class FlatTab extends AbstractButton {
 	}
 
 	@Override
-	public void onPress(InputWithModifiers input) {
+	public void onPress() {
 		this.onPress.run();
 	}
 
 	@Override
-	protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+	protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
 		Font font = Minecraft.getInstance().font;
 		boolean isSelected = this.selected.getAsBoolean();
 		int x = this.getX();
@@ -46,7 +45,7 @@ public class FlatTab extends AbstractButton {
 		Component text = this.getMessage();
 		String clipped = font.plainSubstrByWidth(text.getString(), this.width - 4);
 		Component shown = clipped.length() < text.getString().length() ? Component.literal(clipped) : text;
-		graphics.centeredText(font, shown, x + this.width / 2, y + (this.height - 8) / 2 - 1, color);
+		graphics.drawCenteredString(font, shown, x + this.width / 2, y + (this.height - 8) / 2 - 1, color);
 	}
 
 	@Override

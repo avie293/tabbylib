@@ -3,8 +3,10 @@ package me.avie29.tabbylib.client.gui;
 import me.avie29.tabbylib.api.option.StringListOption;
 import me.avie29.tabbylib.client.gui.widget.TabbyButton;
 import me.avie29.tabbylib.compat.McCompat;
+import me.avie29.tabbylib.compat.TabbyList;
+import me.avie29.tabbylib.compat.TabbyScreen;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
@@ -17,8 +19,8 @@ import net.minecraft.util.Mth;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Edits a {@link StringListOption}: one text field per entry, with add / remove / move buttons. */
-public class StringListScreen extends Screen {
+/** Edits a {@link StringListOption}: one text field per entry, with add / remove / move buttons (legacy variant). */
+public class StringListScreen extends TabbyScreen {
 	private final Screen parent;
 	private final StringListOption option;
 	private final List<String> values;
@@ -43,17 +45,17 @@ public class StringListScreen extends Screen {
 		this.panelX = (this.width - this.panelWidth) / 2;
 		this.panelY = 20;
 
-		double scroll = this.list != null ? this.list.scrollAmount() : 0;
+		double scroll = this.list != null ? this.list.scroll() : 0;
 		this.list = new EntryList(this.minecraft, this.panelX + 2, this.panelY + 22, this.panelWidth - 4, this.panelHeight - 52);
 		this.addRenderableWidget(this.list);
-		this.list.setScrollAmount(scroll);
+		this.list.setScroll(scroll);
 
 		int buttonY = this.panelY + this.panelHeight - 26;
 		int buttonWidth = (this.panelWidth - 28) / 3;
 		TabbyButton addButton = new TabbyButton(buttonWidth, 20, Component.translatable("tabbylib.list.add"), () -> {
 			this.values.add("");
 			this.rebuildWidgets();
-			this.list.setScrollAmount(this.list.maxScrollAmount());
+			this.list.setScroll(this.list.maxScroll());
 		});
 		addButton.active = this.values.size() < this.option.getMaxEntries();
 		TabbyButton cancel = new TabbyButton(buttonWidth, 20, Component.translatable("gui.cancel"), this::onClose);
@@ -75,45 +77,19 @@ public class StringListScreen extends Screen {
 	}
 
 	@Override
-	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+	protected void renderContent(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
 		Panel.draw(graphics, this.panelX, this.panelY, this.panelWidth, this.panelHeight);
-		graphics.text(this.font, OptionListWidget.clip(this.font, this.title, this.panelWidth - 20), this.panelX + 10, this.panelY + 8, 0xFFFFFFFF, true);
+		graphics.drawString(this.font, OptionListWidget.clip(this.font, this.title, this.panelWidth - 20), this.panelX + 10, this.panelY + 8, 0xFFFFFFFF, true);
 		String count = this.values.size() + " / " + this.option.getMaxEntries();
-		graphics.text(this.font, count, this.panelX + this.panelWidth - 10 - this.font.width(count), this.panelY + 8, 0xFF808080, false);
-		super.extractRenderState(graphics, mouseX, mouseY, a);
+		graphics.drawString(this.font, count, this.panelX + this.panelWidth - 10 - this.font.width(count), this.panelY + 8, 0xFF808080, false);
 	}
 
-	private class EntryList extends ContainerObjectSelectionList<EntryList.Row> {
+	private class EntryList extends TabbyList<EntryList.Row> {
 		EntryList(Minecraft minecraft, int x, int y, int width, int height) {
-			super(minecraft, width, height, y, 24);
-			this.setX(x);
-			this.centerListVertically = false;
+			super(minecraft, x, y, width, height, 24);
 			for (int i = 0; i < StringListScreen.this.values.size(); i++) {
-				this.addEntry(new Row(i));
+				this.add(new Row(i));
 			}
-		}
-
-		@Override
-		public int getRowWidth() {
-			return this.width - 14;
-		}
-
-		@Override
-		public int getRowLeft() {
-			return this.getX() + 4;
-		}
-
-		@Override
-		protected int scrollBarX() {
-			return this.getRight() - 7;
-		}
-
-		@Override
-		protected void extractListBackground(GuiGraphicsExtractor graphics) {
-		}
-
-		@Override
-		protected void extractListSeparators(GuiGraphicsExtractor graphics) {
 		}
 
 		private class Row extends ContainerObjectSelectionList.Entry<Row> {
@@ -124,7 +100,7 @@ public class StringListScreen extends Screen {
 
 			Row(int index) {
 				List<String> values = StringListScreen.this.values;
-				this.box = new EditBox(StringListScreen.this.font, 0, 18, Component.literal("#" + (index + 1)));
+				this.box = new EditBox(StringListScreen.this.font, 0, 0, 100, 18, Component.literal("#" + (index + 1)));
 				this.box.setMaxLength(1024);
 				this.box.setValue(values.get(index));
 				this.box.setResponder(text -> values.set(index, text));
@@ -149,18 +125,17 @@ public class StringListScreen extends Screen {
 			}
 
 			@Override
-			public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovered, float a) {
-				int x = this.getContentX();
-				int y = this.getY() + 2;
-				int right = this.getContentRight();
-				this.remove.setPosition(right - 20, y);
-				this.down.setPosition(right - 38, y);
-				this.up.setPosition(right - 56, y);
-				this.box.setRectangle(right - 60 - x - 2, 18, x + 1, y + 1);
-				this.box.extractRenderState(graphics, mouseX, mouseY, a);
-				this.up.extractRenderState(graphics, mouseX, mouseY, a);
-				this.down.extractRenderState(graphics, mouseX, mouseY, a);
-				this.remove.extractRenderState(graphics, mouseX, mouseY, a);
+			public void render(GuiGraphics graphics, int index, int rowTop, int rowLeft, int rowWidth, int rowHeight,
+							   int mouseX, int mouseY, boolean hovered, float delta) {
+				int right = rowLeft + rowWidth;
+				this.remove.setPosition(right - 20, rowTop);
+				this.down.setPosition(right - 38, rowTop);
+				this.up.setPosition(right - 56, rowTop);
+				McCompat.setBounds(this.box, rowLeft + 1, rowTop + 1, right - 60 - rowLeft - 2, 18);
+				this.box.render(graphics, mouseX, mouseY, delta);
+				this.up.render(graphics, mouseX, mouseY, delta);
+				this.down.render(graphics, mouseX, mouseY, delta);
+				this.remove.render(graphics, mouseX, mouseY, delta);
 			}
 
 			@Override

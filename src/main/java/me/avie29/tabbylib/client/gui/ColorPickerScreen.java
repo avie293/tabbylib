@@ -4,17 +4,17 @@ import me.avie29.tabbylib.api.option.ColorOption;
 import me.avie29.tabbylib.client.gui.widget.ColorSwatch;
 import me.avie29.tabbylib.client.gui.widget.TabbyButton;
 import me.avie29.tabbylib.compat.McCompat;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import me.avie29.tabbylib.compat.TabbyScreen;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
 import java.util.function.IntConsumer;
 
-/** HSV color picker with optional alpha, hex input and preset colors. */
-public class ColorPickerScreen extends Screen {
+/** HSV color picker with optional alpha, hex input and preset colors (legacy variant). */
+public class ColorPickerScreen extends TabbyScreen {
 	private static final int SQUARE = 100;
 	private static final int BAR = 12;
 	private static final int PRESET = 12;
@@ -76,7 +76,7 @@ public class ColorPickerScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.panelWidth = (this.alpha ? 290 : 274);
+		this.panelWidth = this.alpha ? 290 : 274;
 		this.panelHeight = 176;
 		this.panelX = (this.width - this.panelWidth) / 2;
 		this.panelY = (this.height - this.panelHeight) / 2;
@@ -92,7 +92,7 @@ public class ColorPickerScreen extends Screen {
 			if (parsed != null) {
 				this.touched = true;
 				this.setFromArgb(this.alpha ? parsed : parsed | 0xFF000000);
-				this.hexBox.setTextColor(EditBox.DEFAULT_TEXT_COLOR);
+				this.hexBox.setTextColor(0xFFE0E0E0);
 			} else {
 				this.hexBox.setTextColor(0xFFFF5555);
 			}
@@ -137,8 +137,8 @@ public class ColorPickerScreen extends Screen {
 		float min = Math.min(r, Math.min(g, b));
 		float delta = max - min;
 
-		float h = 0;
 		if (delta > 0) {
+			float h;
 			if (max == r) {
 				h = ((g - b) / delta) % 6;
 			} else if (max == g) {
@@ -161,7 +161,7 @@ public class ColorPickerScreen extends Screen {
 	private void updateHex() {
 		this.updatingHex = true;
 		this.hexBox.setValue(ColorOption.toHex(this.currentColor(), this.alpha));
-		this.hexBox.setTextColor(EditBox.DEFAULT_TEXT_COLOR);
+		this.hexBox.setTextColor(0xFFE0E0E0);
 		this.updatingHex = false;
 	}
 
@@ -176,26 +176,24 @@ public class ColorPickerScreen extends Screen {
 	// ---------------------------------------------------------------- input
 
 	@Override
-	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		if (event.button() == 0) {
-			double mx = event.x();
-			double my = event.y();
+	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+		if (button == 0) {
 			int top = this.squareY();
-			if (my >= top && my < top + SQUARE) {
-				if (mx >= this.squareX() && mx < this.squareX() + SQUARE) {
+			if (mouseY >= top && mouseY < top + SQUARE) {
+				if (mouseX >= this.squareX() && mouseX < this.squareX() + SQUARE) {
 					this.drag = Drag.SQUARE;
-				} else if (mx >= this.hueX() && mx < this.hueX() + BAR) {
+				} else if (mouseX >= this.hueX() && mouseX < this.hueX() + BAR) {
 					this.drag = Drag.HUE;
-				} else if (this.alpha && mx >= this.alphaX() && mx < this.alphaX() + BAR) {
+				} else if (this.alpha && mouseX >= this.alphaX() && mouseX < this.alphaX() + BAR) {
 					this.drag = Drag.ALPHA;
 				}
 			}
 			if (this.drag != Drag.NONE) {
-				this.updateDrag(mx, my);
+				this.updateDrag(mouseX, mouseY);
 				return true;
 			}
 
-			int preset = this.presetAt(mx, my);
+			int preset = this.presetAt(mouseX, mouseY);
 			if (preset >= 0) {
 				int keepAlpha = this.alpha ? Math.round(this.opacity * 255) << 24 : 0xFF000000;
 				this.touched = true;
@@ -204,22 +202,22 @@ public class ColorPickerScreen extends Screen {
 				return true;
 			}
 		}
-		return super.mouseClicked(event, doubleClick);
+		return super.mouseClicked(mouseX, mouseY, button);
 	}
 
 	@Override
-	public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+	public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
 		if (this.drag != Drag.NONE) {
-			this.updateDrag(event.x(), event.y());
+			this.updateDrag(mouseX, mouseY);
 			return true;
 		}
-		return super.mouseDragged(event, dx, dy);
+		return super.mouseDragged(mouseX, mouseY, button, dx, dy);
 	}
 
 	@Override
-	public boolean mouseReleased(MouseButtonEvent event) {
+	public boolean mouseReleased(double mouseX, double mouseY, int button) {
 		this.drag = Drag.NONE;
-		return super.mouseReleased(event);
+		return super.mouseReleased(mouseX, mouseY, button);
 	}
 
 	private void updateDrag(double mx, double my) {
@@ -255,9 +253,9 @@ public class ColorPickerScreen extends Screen {
 	// ---------------------------------------------------------------- rendering
 
 	@Override
-	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+	protected void renderContent(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
 		Panel.draw(graphics, this.panelX, this.panelY, this.panelWidth, this.panelHeight);
-		graphics.text(this.font, OptionListWidget.clip(this.font, this.title, this.panelWidth - 20), this.panelX + 10, this.panelY + 9, 0xFFFFFFFF, true);
+		graphics.drawString(this.font, OptionListWidget.clip(this.font, this.title, this.panelWidth - 20), this.panelX + 10, this.panelY + 9, 0xFFFFFFFF, true);
 
 		int sx = this.squareX();
 		int sy = this.squareY();
@@ -269,8 +267,8 @@ public class ColorPickerScreen extends Screen {
 		}
 		int markerX = sx + Math.round(this.saturation * (SQUARE - 1));
 		int markerY = sy + Math.round((1 - this.brightness) * (SQUARE - 1));
-		graphics.outline(markerX - 2, markerY - 2, 5, 5, 0xFFFFFFFF);
-		graphics.outline(markerX - 3, markerY - 3, 7, 7, 0xFF000000);
+		graphics.renderOutline(markerX - 2, markerY - 2, 5, 5, 0xFFFFFFFF);
+		graphics.renderOutline(markerX - 3, markerY - 3, 7, 7, 0xFF000000);
 
 		// Hue bar
 		int hx = this.hueX();
@@ -299,8 +297,8 @@ public class ColorPickerScreen extends Screen {
 		// Old / new preview
 		int px = this.sideX();
 		int previewWidth = (this.panelX + this.panelWidth - 10 - px) / 2;
-		graphics.text(this.font, Component.translatable("tabbylib.color.new"), px, sy, 0xFFA0A0A0, false);
-		graphics.text(this.font, Component.translatable("tabbylib.color.old"), px + previewWidth, sy, 0xFFA0A0A0, false);
+		graphics.drawString(this.font, Component.translatable("tabbylib.color.new"), px, sy, 0xFFA0A0A0, false);
+		graphics.drawString(this.font, Component.translatable("tabbylib.color.old"), px + previewWidth, sy, 0xFFA0A0A0, false);
 		graphics.fill(px, sy + 11, px + previewWidth * 2, sy + 37, 0xFF000000);
 		ColorSwatch.drawColor(graphics, px + 1, sy + 12, px + previewWidth, sy + 36, this.currentColor());
 		ColorSwatch.drawColor(graphics, px + previewWidth, sy + 12, px + previewWidth * 2 - 1, sy + 36, this.initialColor);
@@ -314,7 +312,5 @@ public class ColorPickerScreen extends Screen {
 			graphics.fill(x - 1, y - 1, x + PRESET + 1, y + PRESET + 1, hovered ? 0xFFFFFFFF : 0xFF000000);
 			graphics.fill(x, y, x + PRESET, y + PRESET, PRESETS[i]);
 		}
-
-		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 }
