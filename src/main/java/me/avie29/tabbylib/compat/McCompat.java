@@ -15,11 +15,11 @@ public final class McCompat {
 	}
 
 	public static void setScreen(@Nullable Screen screen) {
-		Minecraft.getInstance().setScreen(screen);
+		Minecraft.getInstance().gui.setScreen(screen);
 	}
 
 	public static @Nullable Screen currentScreen() {
-		return Minecraft.getInstance().screen;
+		return Minecraft.getInstance().gui.screen();
 	}
 
 	public static void setBounds(AbstractWidget widget, int x, int y, int width, int height) {
