@@ -21,6 +21,10 @@ public record HudPosition(int anchorX, int anchorY, int offsetX, int offsetY) {
 		anchorY = Mth.clamp(anchorY, START, END);
 	}
 
+	/**
+	 * Same as the constructor. Example: {@code HudPosition.of(HudPosition.END, HudPosition.START, -4, 4)}
+	 * is the top right corner, 4 pixels away from both edges.
+	 */
 	public static HudPosition of(int anchorX, int anchorY, int offsetX, int offsetY) {
 		return new HudPosition(anchorX, anchorY, offsetX, offsetY);
 	}
