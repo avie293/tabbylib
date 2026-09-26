@@ -1,7 +1,7 @@
 # TabbyLib
 Config Library for Avies Mods
 
-Adds a "Mod Settings..." button to the options menu (also `/tabbylib [mod id]`). The screen shows every mod that
+Adds a "Tabby Config..." button to the options menu (also `/tabbylib [mod id]`). The screen shows every mod that
 uses TabbyLib on the left and its settings on the right. Settings are only applied when you press Save.
 
 ## Features
@@ -18,10 +18,12 @@ uses TabbyLib on the left and its settings on the right. Settings are only appli
 - NeoForge / Forge: the "Config" button in the loader's mod list opens the TabbyLib screen automatically
 
 ## Using it in a mod
+Full guide: https://avie29.me/tabbylib/wiki/
+
 `build.gradle`:
 ```groovy
 repositories {
-	mavenLocal() // after "gradlew publishToMavenLocal" in the TabbyLib project
+	maven { url = "https://avie29.me/maven" }
 }
 dependencies {
 	// Fabric (1.21.1: modImplementation)

@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Adds the "Mod Settings" button as a full width row below the vanilla option buttons. */
+/** Adds the "Tabby Config" button as a full width row below the vanilla option buttons. */
 @Mixin(OptionsScreen.class)
 public abstract class OptionsScreenMixin extends Screen {
 	protected OptionsScreenMixin(Component title) {
