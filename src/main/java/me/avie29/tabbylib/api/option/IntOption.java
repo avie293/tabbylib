@@ -25,26 +25,36 @@ public class IntOption extends Option<Integer> {
 		this.formatter = builder.formatter;
 	}
 
+	/**
+	 * Starts a new whole number option.
+	 *
+	 * @param key unique key inside the config, used in the file and in the translation key
+	 */
 	public static Builder builder(String key, int defaultValue) {
 		return new Builder(key, defaultValue);
 	}
 
+	/** Smallest allowed value. */
 	public int getMin() {
 		return this.min;
 	}
 
+	/** Largest allowed value. */
 	public int getMax() {
 		return this.max;
 	}
 
+	/** Values snap to multiples of this step (counted from the minimum). */
 	public int getStep() {
 		return this.step;
 	}
 
+	/** Whether the screen shows a slider (else a text field). */
 	public boolean isSlider() {
 		return this.slider;
 	}
 
+	/** Text shown for a value, from the {@link Builder#formatter} if one is set. */
 	public Component valueText(int value) {
 		return this.formatter != null ? this.formatter.apply(value) : Component.literal(Integer.toString(value));
 	}
@@ -68,6 +78,7 @@ public class IntOption extends Option<Integer> {
 		return json.getAsInt();
 	}
 
+	/** Builder for {@link IntOption}. The shared settings are in {@link Option.Builder}. */
 	public static class Builder extends Option.Builder<Integer, Builder> {
 		private int min = Integer.MIN_VALUE;
 		private int max = Integer.MAX_VALUE;
