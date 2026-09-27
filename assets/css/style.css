@@ -117,6 +117,11 @@ img {
 	max-width: 100%;
 }
 
+/* Elements hidden by the scripts stay hidden, even when a class sets display (like .mc-button) */
+[hidden] {
+	display: none !important;
+}
+
 /* Only one language is visible at a time */
 html[lang="de"] [data-lang="en"],
 html[lang="en"] [data-lang="de"] {
@@ -412,6 +417,10 @@ html[lang="en"] [data-lang="de"] {
 	color: var(--text-dim);
 }
 
+.mod-entry .version.soon {
+	color: var(--accent-text);
+}
+
 /* ---------------------------------------------------------------- content (right panel) */
 
 .content {
@@ -664,6 +673,30 @@ table.doc th {
 .md summary {
 	cursor: pointer;
 	font-weight: 600;
+}
+
+/* Placeholder while a project is not public on Modrinth yet */
+.coming-soon {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding: 32px 20px;
+	text-align: center;
+}
+
+.coming-soon .title {
+	font-size: 28px;
+	font-weight: 700;
+	line-height: 1.2;
+	color: var(--accent-text);
+	text-shadow: var(--mc-shadow);
+}
+
+.coming-soon p {
+	max-width: 520px;
+	margin: 0;
+	color: var(--text-muted);
 }
 
 /* ---------------------------------------------------------------- gallery (mod pages) */

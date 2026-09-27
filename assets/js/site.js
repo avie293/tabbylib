@@ -11,8 +11,8 @@
 		modrinth: "https://modrinth.com/user/Avie"
 	};
 
-	// slug: the project on Modrinth (modrinth.com/mod/<slug>). null = not published yet, the page then shows a note.
-	// Set TabbyLib's slug here once it is published.
+	// slug: the project on Modrinth (modrinth.com/mod/<slug>). As long as Modrinth does not show the project publicly
+	// (draft, in review), its pages show "Coming Soon" and switch to the Modrinth content by themselves once it is public.
 	// type: "mod" or "datapack" - decides the section in the side list and which downloads are shown.
 	// tagline: one short line per language, shown on the project's card on the start page.
 	var TYPES = [
@@ -25,7 +25,7 @@
 			id: "tabbylib",
 			name: "TabbyLib",
 			type: "mod",
-			slug: null,
+			slug: "tabbylib",
 			icon: "/assets/img/icons/tabbylib.png",
 			page: "/tabbylib/",
 			source: null,
@@ -108,7 +108,10 @@
 			"description.image": "Bild öffnen",
 			"modrinth.loading": "Lade Versionen von Modrinth",
 			"modrinth.error": "Modrinth ist gerade nicht erreichbar. Versuch es später noch einmal oder öffne die Seite direkt auf Modrinth.",
-			"modrinth.missing": "Noch nicht auf Modrinth veröffentlicht.",
+			"soon.title": "Coming Soon",
+			"soon.text": "{name} ist noch nicht auf Modrinth veröffentlicht. Sobald es so weit ist, erscheinen hier automatisch Beschreibung, Bilder und Downloads.",
+			"soon.downloads": "Die Downloads gibt es, sobald {name} auf Modrinth veröffentlicht ist.",
+			"soon.card": "Bald auf Modrinth",
 			"link.modrinth": "Modrinth",
 			"link.source": "Quellcode",
 			"link.wiki": "Wiki",
@@ -150,7 +153,10 @@
 			"description.image": "Open image",
 			"modrinth.loading": "Loading versions from Modrinth",
 			"modrinth.error": "Modrinth can not be reached right now. Try again later or open the project on Modrinth directly.",
-			"modrinth.missing": "Not published on Modrinth yet.",
+			"soon.title": "Coming Soon",
+			"soon.text": "{name} is not published on Modrinth yet. As soon as it is, the description, images and downloads will show up here by themselves.",
+			"soon.downloads": "Downloads will be available as soon as {name} is published on Modrinth.",
+			"soon.card": "Soon on Modrinth",
 			"link.modrinth": "Modrinth",
 			"link.source": "Source code",
 			"link.wiki": "Wiki",

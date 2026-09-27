@@ -183,10 +183,27 @@
 
 	// ---------------------------------------------------------------- rendering
 
+	/**
+	 * Modrinth answers 404 while a project is a draft or in review: it is coming soon.
+	 * undefined means Modrinth could not be reached, that is not "soon" but an error.
+	 */
+	function isComingSoon(data) {
+		return data !== undefined && !(data && data.project);
+	}
+
+	function comingSoonBox(mod) {
+		return el("div", { "class": "coming-soon panel" }, [
+			el("div", { "class": "title", text: t("soon.title") }),
+			el("p", { text: t("soon.text", { name: mod.name }) })
+		]);
+	}
+
 	function renderSidebar(mod, data) {
 		document.querySelectorAll('[data-mod-version="' + mod.id + '"]').forEach(function (target) {
+			var soon = isComingSoon(data);
 			var latest = data && data.versions ? latestVersion(mod, data.versions) : null;
-			target.textContent = latest ? displayVersion(latest.version_number) : "–";
+			target.classList.toggle("soon", soon);
+			target.textContent = soon ? t("soon.title") : latest ? displayVersion(latest.version_number) : "–";
 		});
 	}
 
@@ -202,8 +219,11 @@
 			card.appendChild(el("div", { "class": "tagline", text: mod.tagline[site.lang()] || mod.tagline.en }));
 		}
 
-		if (!data || !data.versions) {
-			card.appendChild(el("div", { "class": "meta", text: data === undefined ? t("modrinth.error") : t("modrinth.missing") }));
+		if (isComingSoon(data)) {
+			card.appendChild(el("div", { "class": "big-version", text: t("soon.title") }));
+			card.appendChild(el("div", { "class": "meta", text: t("soon.card") }));
+		} else if (!data || !data.versions) {
+			card.appendChild(el("div", { "class": "meta", text: t("modrinth.error") }));
 		} else {
 			var latest = latestVersion(mod, data.versions);
 			if (latest) {
@@ -230,8 +250,8 @@
 			container.appendChild(el("a", { "class": "mc-button small", href: modrinthUrl(mod), rel: "noopener", text: t("link.modrinth") }));
 			return;
 		}
-		if (!data || !data.versions) {
-			container.appendChild(el("p", { "class": "empty", text: t("modrinth.missing") }));
+		if (isComingSoon(data)) {
+			container.appendChild(el("p", { "class": "empty", text: t("soon.downloads", { name: mod.name }) }));
 			return;
 		}
 
@@ -343,6 +363,13 @@
 		}
 		output.textContent = "";
 		container.classList.remove("is-loading");
+
+		// Drawn again on every language change, so no data-rendered here
+		if (isComingSoon(data)) {
+			output.appendChild(comingSoonBox(mod));
+			container.classList.add("from-modrinth");
+			return;
+		}
 
 		var body = data && data.project && data.project.body;
 		if (!body || !window.marked || !window.DOMPurify) {
@@ -566,9 +593,9 @@
 			var mod = site.MODS.find(function (m) { return m.id === link.getAttribute("data-modrinth-link"); });
 			if (mod && mod.slug) {
 				link.href = modrinthUrl(mod);
-			} else {
-				link.hidden = true;
 			}
+			// Visitors would only get a "not found" page on Modrinth
+			link.hidden = !mod || !mod.slug || (mod.id in results && isComingSoon(results[mod.id]));
 		});
 	}
 
