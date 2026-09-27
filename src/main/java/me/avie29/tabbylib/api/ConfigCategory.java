@@ -23,10 +23,15 @@ public class ConfigCategory {
 		this.key = key;
 	}
 
+	/** Key of the category, used in its translation key. */
 	public String getKey() {
 		return this.key;
 	}
 
+	/**
+	 * Display name: the one set with {@link #name}, otherwise the translation of
+	 * {@code config.<translation id>.category.<key>}.
+	 */
 	public Component getName() {
 		if (this.name != null) {
 			return this.name;
@@ -35,6 +40,7 @@ public class ConfigCategory {
 		return Component.translatable("config." + modId + ".category." + this.key);
 	}
 
+	/** Uses a fixed name instead of the translation key. */
 	public ConfigCategory name(Component name) {
 		this.name = name;
 		return this;
@@ -46,6 +52,7 @@ public class ConfigCategory {
 		return this;
 	}
 
+	/** Adds several entries in the given order. */
 	public ConfigCategory add(ConfigEntry... entries) {
 		for (ConfigEntry entry : entries) {
 			this.add(entry);
@@ -65,6 +72,7 @@ public class ConfigCategory {
 		return this.add(new LabelEntry(text));
 	}
 
+	/** The entries in display order. Groups are returned as one entry, see {@link #getOptions()}. */
 	public List<ConfigEntry> getEntries() {
 		return Collections.unmodifiableList(this.entries);
 	}
