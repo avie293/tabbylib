@@ -13,6 +13,7 @@ displayName="TabbyLib"
 authors="Avie29"
 description='''Config Library for Avies Mods'''
 iconFile="icon.png"
+bannerFile="icon.png"
 
 [[dependencies.${mod_id}]]
 modId="neoforge"
