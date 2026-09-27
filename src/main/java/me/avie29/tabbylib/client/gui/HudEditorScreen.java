@@ -1,5 +1,6 @@
 package me.avie29.tabbylib.client.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.avie29.tabbylib.TabbyLibConfig;
 import me.avie29.tabbylib.api.HudPosition;
 import me.avie29.tabbylib.api.HudPreview;
@@ -165,7 +166,7 @@ public class HudEditorScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		if (event.button() == 0 && this.isOverElement(event.x(), event.y())) {
+		if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && this.isOverElement(event.x(), event.y())) {
 			this.dragging = true;
 			this.dragOffsetX = (int) event.x() - this.elementX();
 			this.dragOffsetY = (int) event.y() - this.elementY();
@@ -190,7 +191,7 @@ public class HudEditorScreen extends Screen {
 
 	@Override
 	public boolean mouseReleased(MouseButtonEvent event) {
-		if (this.dragging && event.button() == 0) {
+		if (this.dragging && event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
 			this.dragging = false;
 			this.guideHorizontal = false;
 			this.guideVertical = false;
