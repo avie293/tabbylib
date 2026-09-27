@@ -37,7 +37,8 @@
 			// No storage available, just load it
 		}
 		if (!pending[path]) {
-			pending[path] = fetch(API + path, { headers: { Accept: "application/json" } }).then(function (response) {
+			// Modrinth sends max-age of 31 days, without no-cache the browser would keep showing old versions
+			pending[path] = fetch(API + path, { cache: "no-cache", headers: { Accept: "application/json" } }).then(function (response) {
 				if (response.status === 404) {
 					return null;
 				}
