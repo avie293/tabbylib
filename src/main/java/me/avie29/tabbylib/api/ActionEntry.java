@@ -12,6 +12,7 @@ import org.jspecify.annotations.Nullable;
  * @param action     runs on the client thread when clicked
  */
 public record ActionEntry(Component name, Component buttonText, @Nullable Component tooltip, Runnable action) implements ConfigEntry {
+	/** Creates an action without tooltip. */
 	public static ActionEntry of(Component name, Component buttonText, Runnable action) {
 		return new ActionEntry(name, buttonText, null, action);
 	}
