@@ -363,6 +363,13 @@ html[lang="en"] [data-lang="de"] {
 	letter-spacing: 1px;
 }
 
+/* Every further section (Datapacks, ...) gets a line above it */
+.mod-entry + .modlist-title {
+	margin-top: 12px;
+	padding-top: 10px;
+	border-top: 1px solid var(--separator);
+}
+
 .mod-entry {
 	display: flex;
 	align-items: center;
@@ -642,6 +649,11 @@ table.doc th {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
 	gap: 10px;
+}
+
+/* Only one column (datapacks): keep it as wide as one of the three mod columns would be */
+.loader-grid.single {
+	grid-template-columns: minmax(0, 300px);
 }
 
 .loader-column {

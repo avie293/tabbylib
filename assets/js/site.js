@@ -13,11 +13,18 @@
 
 	// slug: the project on Modrinth (modrinth.com/mod/<slug>). null = not published yet, the page then shows a note.
 	// Set TabbyLib's slug here once it is published.
-	// tagline: one short line per language, shown on the mod's card on the start page.
+	// type: "mod" or "datapack" - decides the section in the side list and which downloads are shown.
+	// tagline: one short line per language, shown on the project's card on the start page.
+	var TYPES = [
+		{ id: "mod", title: "mods.title" },
+		{ id: "datapack", title: "datapacks.title" }
+	];
+
 	var MODS = [
 		{
 			id: "tabbylib",
 			name: "TabbyLib",
+			type: "mod",
 			slug: null,
 			icon: "/assets/img/icons/tabbylib.png",
 			page: "/tabbylib/",
@@ -30,6 +37,7 @@
 		{
 			id: "day-counter",
 			name: "Day Counter",
+			type: "mod",
 			slug: "avies-day-counter",
 			icon: "/assets/img/icons/day-counter.png",
 			page: "/day-counter/",
@@ -42,6 +50,7 @@
 		{
 			id: "ping-display",
 			name: "Ping Display",
+			type: "mod",
 			slug: "avies-ping-display",
 			icon: "/assets/img/icons/ping-display.png",
 			page: "/ping-display/",
@@ -49,6 +58,19 @@
 			tagline: {
 				de: "Ping als farbiger Text in der Tabliste",
 				en: "Ping as colored text in the tab list"
+			}
+		},
+		{
+			id: "day-counter-datapack",
+			name: "Day Counter",
+			type: "datapack",
+			slug: "aviesdaycounter-datapack",
+			icon: "/assets/img/icons/day-counter.png",
+			page: "/day-counter-datapack/",
+			source: null,
+			tagline: {
+				de: "Der aktuelle Minecraft-Tag in der Actionbar – ganz ohne Mods",
+				en: "The current Minecraft day in the action bar – no mods needed"
 			}
 		}
 	];
@@ -65,9 +87,11 @@
 			"lang.de": "Deutsch",
 			"lang.en": "Englisch",
 			"mods.title": "Mods",
+			"datapacks.title": "Datapacks",
 			"mods.loading": "lädt",
 			"latest.title": "Neueste Versionen",
 			"latest.open": "Zur Mod-Seite",
+			"latest.open.datapack": "Zur Datapack-Seite",
 			"latest.published": "Veröffentlicht am {date}",
 			"latest.downloads": "{count} Downloads",
 			"downloads.title": "Downloads",
@@ -97,9 +121,11 @@
 			"lang.de": "German",
 			"lang.en": "English",
 			"mods.title": "Mods",
+			"datapacks.title": "Datapacks",
 			"mods.loading": "loading",
 			"latest.title": "Latest releases",
 			"latest.open": "Open mod page",
+			"latest.open.datapack": "Open datapack page",
 			"latest.published": "Released on {date}",
 			"latest.downloads": "{count} downloads",
 			"downloads.title": "Downloads",
@@ -421,19 +447,25 @@
 
 	function renderModList(container) {
 		var current = document.body.getAttribute("data-mod");
-		container.appendChild(element("div", { "class": "modlist-title", "data-i18n": "mods.title" }));
-		MODS.forEach(function (mod) {
-			var attributes = { "class": "mod-entry", href: mod.page };
-			if (mod.id === current) {
-				attributes["aria-current"] = "page";
+		TYPES.forEach(function (type) {
+			var mods = MODS.filter(function (mod) { return mod.type === type.id; });
+			if (mods.length === 0) {
+				return;
 			}
-			container.appendChild(element("a", attributes, [
-				element("img", { src: mod.icon, alt: "", width: "40", height: "40" }),
-				element("span", {}, [
-					element("span", { "class": "name", text: mod.name }),
-					element("span", { "class": "version", "data-mod-version": mod.id, text: "…" })
-				])
-			]));
+			container.appendChild(element("div", { "class": "modlist-title", "data-i18n": type.title }));
+			mods.forEach(function (mod) {
+				var attributes = { "class": "mod-entry", href: mod.page };
+				if (mod.id === current) {
+					attributes["aria-current"] = "page";
+				}
+				container.appendChild(element("a", attributes, [
+					element("img", { src: mod.icon, alt: "", width: "40", height: "40" }),
+					element("span", {}, [
+						element("span", { "class": "name", text: mod.name }),
+						element("span", { "class": "version", "data-mod-version": mod.id, text: "…" })
+					])
+				]));
+			});
 		});
 	}
 

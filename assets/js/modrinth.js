@@ -5,12 +5,17 @@
 
 	var API = "https://api.modrinth.com/v2";
 	var CACHE_MINUTES = 10;
-	var LOADERS = [
-		{ id: "fabric", name: "Fabric" },
-		{ id: "neoforge", name: "NeoForge" },
-		{ id: "forge", name: "Forge" }
-	];
-	var LOADER_IDS = LOADERS.map(function (loader) { return loader.id; });
+	// Download columns per project type (see type in site.js)
+	var LOADERS = {
+		mod: [
+			{ id: "fabric", name: "Fabric" },
+			{ id: "neoforge", name: "NeoForge" },
+			{ id: "forge", name: "Forge" }
+		],
+		datapack: [
+			{ id: "datapack", name: "Datapack" }
+		]
+	};
 
 	var site = window.Avie29;
 	var t = site.t;
@@ -88,8 +93,13 @@
 		return match ? match[1] : versionNumber;
 	}
 
-	function isModVersion(version) {
-		return version.loaders.some(function (loader) { return LOADER_IDS.indexOf(loader) >= 0; });
+	function loadersOf(mod) {
+		return LOADERS[mod.type] || LOADERS.mod;
+	}
+
+	/** Does the version run on one of the loaders this project is listed for? */
+	function isProjectVersion(mod, version) {
+		return loadersOf(mod).some(function (loader) { return version.loaders.indexOf(loader.id) >= 0; });
 	}
 
 	function newestFirst(a, b) {
@@ -97,8 +107,8 @@
 	}
 
 	/** Latest release of the mod (beta / alpha only when there is no release at all). */
-	function latestVersion(versions) {
-		var mods = versions.filter(isModVersion).sort(newestFirst);
+	function latestVersion(mod, versions) {
+		var mods = versions.filter(function (version) { return isProjectVersion(mod, version); }).sort(newestFirst);
 		return mods.find(function (v) { return v.version_type === "release"; }) || mods[0] || null;
 	}
 
@@ -175,7 +185,7 @@
 
 	function renderSidebar(mod, data) {
 		document.querySelectorAll('[data-mod-version="' + mod.id + '"]').forEach(function (target) {
-			var latest = data && data.versions ? latestVersion(data.versions) : null;
+			var latest = data && data.versions ? latestVersion(mod, data.versions) : null;
 			target.textContent = latest ? displayVersion(latest.version_number) : "–";
 		});
 	}
@@ -195,9 +205,9 @@
 		if (!data || !data.versions) {
 			card.appendChild(el("div", { "class": "meta", text: data === undefined ? t("modrinth.error") : t("modrinth.missing") }));
 		} else {
-			var latest = latestVersion(data.versions);
+			var latest = latestVersion(mod, data.versions);
 			if (latest) {
-				var loaders = LOADERS.filter(function (loader) {
+				var loaders = loadersOf(mod).filter(function (loader) {
 					return data.versions.some(function (v) { return v.loaders.indexOf(loader.id) >= 0; });
 				});
 				card.appendChild(el("div", { "class": "big-version", text: displayVersion(latest.version_number) }));
@@ -209,7 +219,7 @@
 			}
 		}
 
-		card.appendChild(el("a", { "class": "mc-button small", href: mod.page, text: t("latest.open") }));
+		card.appendChild(el("a", { "class": "mc-button small", href: mod.page, text: t(mod.type === "datapack" ? "latest.open.datapack" : "latest.open") }));
 		return card;
 	}
 
@@ -225,8 +235,9 @@
 			return;
 		}
 
-		var grid = el("div", { "class": "loader-grid" });
-		LOADERS.forEach(function (loader) {
+		var loaders = loadersOf(mod);
+		var grid = el("div", { "class": loaders.length === 1 ? "loader-grid single" : "loader-grid" });
+		loaders.forEach(function (loader) {
 			var column = el("section", { "class": "loader-column panel" }, [el("h3", { text: loader.name })]);
 			var rows = downloadRows(data.versions, loader.id);
 			if (rows.length === 0) {
@@ -270,11 +281,13 @@
 			}
 		});
 
+		// data-latest-releases="mod" / "datapack" shows only that type, an empty value shows everything
 		document.querySelectorAll("[data-latest-releases]").forEach(function (container) {
+			var type = container.getAttribute("data-latest-releases");
 			container.innerHTML = "";
 			var cards = el("div", { "class": "release-cards" });
 			site.MODS.forEach(function (mod) {
-				if (mod.id in results) {
+				if (mod.id in results && (!type || mod.type === type)) {
 					cards.appendChild(renderLatestCard(mod, results[mod.id]));
 				}
 			});
