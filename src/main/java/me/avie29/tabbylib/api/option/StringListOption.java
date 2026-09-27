@@ -15,10 +15,16 @@ public class StringListOption extends Option<List<String>> {
 		this.maxEntries = builder.maxEntries;
 	}
 
+	/**
+	 * Starts a new list option.
+	 *
+	 * @param key unique key inside the config, used in the file and in the translation key
+	 */
 	public static Builder builder(String key, List<String> defaultValue) {
 		return new Builder(key, List.copyOf(defaultValue));
 	}
 
+	/** Largest number of entries the list may have. */
 	public int getMaxEntries() {
 		return this.maxEntries;
 	}
@@ -50,6 +56,7 @@ public class StringListOption extends Option<List<String>> {
 		return list;
 	}
 
+	/** Builder for {@link StringListOption}. The shared settings are in {@link Option.Builder}. */
 	public static class Builder extends Option.Builder<List<String>, Builder> {
 		private int maxEntries = 256;
 
@@ -57,6 +64,7 @@ public class StringListOption extends Option<List<String>> {
 			super(key, defaultValue);
 		}
 
+		/** Limits the number of entries (default 256). */
 		public Builder maxEntries(int maxEntries) {
 			this.maxEntries = maxEntries;
 			return this;

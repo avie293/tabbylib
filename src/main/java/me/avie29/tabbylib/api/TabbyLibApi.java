@@ -39,6 +39,7 @@ public final class TabbyLibApi {
 		return Collections.unmodifiableList(list);
 	}
 
+	/** The config registered for this mod id, or null. */
 	public static synchronized @Nullable TabbyConfig getConfig(String modId) {
 		return CONFIGS.get(modId);
 	}

@@ -21,13 +21,18 @@ public class HudPositionOption extends Option<HudPosition> {
 	}
 
 	/**
-	 * @param preview creates the preview drawn in the editor. It is a supplier so the class is only
-	 *                touched on the client when the editor opens.
+	 * Starts a new HUD position option.
+	 *
+	 * @param key          unique key inside the config, used in the file and in the translation key
+	 * @param defaultValue where the element is before the player moves it
+	 * @param preview      creates the preview drawn in the editor. It is a supplier so the class is only
+	 *                     touched on the client when the editor opens.
 	 */
 	public static Builder builder(String key, HudPosition defaultValue, Supplier<HudPreview> preview) {
 		return new Builder(key, defaultValue, preview);
 	}
 
+	/** Creates the preview drawn in the HUD editor. */
 	public HudPreview createPreview() {
 		return this.preview.get();
 	}
@@ -61,6 +66,7 @@ public class HudPositionOption extends Option<HudPosition> {
 		);
 	}
 
+	/** Builder for {@link HudPositionOption}. The shared settings are in {@link Option.Builder}. */
 	public static class Builder extends Option.Builder<HudPosition, Builder> {
 		private final Supplier<HudPreview> preview;
 
