@@ -5,11 +5,13 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Day Counter Datapack</title>
 	<meta name="description" content="Day Counter Datapack - shows the current Minecraft day in the action bar, no mods needed. Downloads for every Minecraft version.">
-	<link rel="icon" type="image/png" href="/assets/img/favicon.png?v=3">
-	<link rel="stylesheet" href="/assets/css/style.css?v=3">
-	<script src="/assets/js/boot.js?v=3"></script>
-	<script src="/assets/js/site.js?v=3" defer></script>
-	<script src="/assets/js/modrinth.js?v=3" defer></script>
+	<link rel="icon" type="image/png" href="/assets/img/favicon.png?v=4">
+	<link rel="stylesheet" href="/assets/css/style.css?v=4">
+	<script src="/assets/js/boot.js?v=4"></script>
+	<script src="/assets/js/site.js?v=4" defer></script>
+	<script src="/assets/js/vendor/marked.umd.js" defer></script>
+	<script src="/assets/js/vendor/purify.min.js" defer></script>
+	<script src="/assets/js/modrinth.js?v=4" defer></script>
 </head>
 <body data-page="mod" data-mod="day-counter-datapack" data-title-de="Day Counter Datapack – Download" data-title-en="Day Counter Datapack – Download">
 <div class="layout">
@@ -33,7 +35,26 @@
 				</div>
 			</div>
 
-			<div class="prose">
+			<div class="note">
+				<div data-lang="de">
+					<p>
+						<strong>Installation:</strong> Lade die ZIP-Datei für deine Minecraft-Version herunter und lege sie in den Ordner
+						<code>datapacks</code> deiner Welt (auf Servern: <code>world/datapacks</code>). Danach <code>/reload</code>
+						ausführen oder die Welt neu laden.
+					</p>
+					<p>Du willst mehr einstellen – Position, Farben, eigene Formate? Dann nimm <a href="/day-counter/">Day Counter als Mod</a>.</p>
+				</div>
+				<div data-lang="en">
+					<p>
+						<strong>Installation:</strong> Download the ZIP file for your Minecraft version and put it into your world's
+						<code>datapacks</code> folder (on servers: <code>world/datapacks</code>). Then run <code>/reload</code> or
+						reload the world.
+					</p>
+					<p>Want more settings – position, colors, your own formats? Then use <a href="/day-counter/">Day Counter as a mod</a>.</p>
+				</div>
+			</div>
+
+			<div class="prose" data-description="day-counter-datapack">
 				<div data-lang="de">
 					<p>
 						Day Counter gibt es auch als Datapack. Es zeigt allen Spielern in der Actionbar, der wievielte Tag in der
@@ -45,12 +66,6 @@
 						<li>Keine Mods nötig: funktioniert in Einzelspieler-Welten und auf Servern</li>
 						<li>Versionen ab Minecraft 1.17 – die passende findest du unten bei den Downloads</li>
 					</ul>
-					<p>
-						<strong>Installation:</strong> Lade die ZIP-Datei für deine Minecraft-Version herunter und lege sie in den Ordner
-						<code>datapacks</code> deiner Welt (auf Servern: <code>world/datapacks</code>). Danach <code>/reload</code>
-						ausführen oder die Welt neu laden.
-					</p>
-					<p>Du willst mehr einstellen – Position, Farben, eigene Formate? Dann nimm <a href="/day-counter/">Day Counter als Mod</a>.</p>
 				</div>
 				<div data-lang="en">
 					<p>
@@ -63,14 +78,12 @@
 						<li>No mods needed: works in singleplayer worlds and on servers</li>
 						<li>Versions from Minecraft 1.17 on – find the right one in the downloads below</li>
 					</ul>
-					<p>
-						<strong>Installation:</strong> Download the ZIP file for your Minecraft version and put it into your world's
-						<code>datapacks</code> folder (on servers: <code>world/datapacks</code>). Then run <code>/reload</code> or
-						reload the world.
-					</p>
-					<p>Want more settings – position, colors, your own formats? Then use <a href="/day-counter/">Day Counter as a mod</a>.</p>
 				</div>
 			</div>
+
+			<section data-gallery="day-counter-datapack" hidden>
+				<h2 data-i18n="gallery.title">Gallery</h2>
+			</section>
 
 			<h2 data-i18n="downloads.title">Downloads</h2>
 			<div data-downloads="day-counter-datapack"></div>

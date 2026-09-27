@@ -5,11 +5,13 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Day Counter</title>
 	<meta name="description" content="Day Counter - shows the current Minecraft day in a configurable HUD. Downloads for Fabric, NeoForge and Forge.">
-	<link rel="icon" type="image/png" href="/assets/img/favicon.png?v=3">
-	<link rel="stylesheet" href="/assets/css/style.css?v=3">
-	<script src="/assets/js/boot.js?v=3"></script>
-	<script src="/assets/js/site.js?v=3" defer></script>
-	<script src="/assets/js/modrinth.js?v=3" defer></script>
+	<link rel="icon" type="image/png" href="/assets/img/favicon.png?v=4">
+	<link rel="stylesheet" href="/assets/css/style.css?v=4">
+	<script src="/assets/js/boot.js?v=4"></script>
+	<script src="/assets/js/site.js?v=4" defer></script>
+	<script src="/assets/js/vendor/marked.umd.js" defer></script>
+	<script src="/assets/js/vendor/purify.min.js" defer></script>
+	<script src="/assets/js/modrinth.js?v=4" defer></script>
 </head>
 <body data-page="mod" data-mod="day-counter" data-title-de="Day Counter – Download" data-title-en="Day Counter – Download">
 <div class="layout">
@@ -34,7 +36,18 @@
 				</div>
 			</div>
 
-			<div class="prose">
+			<div class="note">
+				<div data-lang="de">
+					<p>Ab Day Counter 1.1.0 wird <a href="/tabbylib/">TabbyLib</a> benötigt.</p>
+					<p>Lieber ohne Mods? Day Counter gibt es auch als <a href="/day-counter-datapack/">Datapack</a>.</p>
+				</div>
+				<div data-lang="en">
+					<p>From Day Counter 1.1.0 on, <a href="/tabbylib/">TabbyLib</a> is required.</p>
+					<p>Rather play without mods? Day Counter is also available as a <a href="/day-counter-datapack/">datapack</a>.</p>
+				</div>
+			</div>
+
+			<div class="prose" data-description="day-counter">
 				<div data-lang="de">
 					<p>Day Counter zeigt dir jederzeit, der wievielte Tag in deiner Welt gerade ist. Alles lässt sich in der Tabby Config einstellen:</p>
 					<ul>
@@ -44,8 +57,6 @@
 						<li>Taste zum Ein- und Ausblenden (Standard: <code>H</code>)</li>
 						<li>Befehle: <code>/dc config</code>, <code>/dc position</code>, <code>/dc bgtoggle</code>, <code>/dc help</code></li>
 					</ul>
-					<p>Ab Day Counter 1.1.0 wird <a href="/tabbylib/">TabbyLib</a> benötigt.</p>
-					<p>Lieber ohne Mods? Day Counter gibt es auch als <a href="/day-counter-datapack/">Datapack</a>.</p>
 				</div>
 				<div data-lang="en">
 					<p>Day Counter always shows you which day it is in your world. Everything can be changed in the Tabby Config:</p>
@@ -56,10 +67,12 @@
 						<li>Key to show and hide it (default: <code>H</code>)</li>
 						<li>Commands: <code>/dc config</code>, <code>/dc position</code>, <code>/dc bgtoggle</code>, <code>/dc help</code></li>
 					</ul>
-					<p>From Day Counter 1.1.0 on, <a href="/tabbylib/">TabbyLib</a> is required.</p>
-					<p>Rather play without mods? Day Counter is also available as a <a href="/day-counter-datapack/">datapack</a>.</p>
 				</div>
 			</div>
+
+			<section data-gallery="day-counter" hidden>
+				<h2 data-i18n="gallery.title">Gallery</h2>
+			</section>
 
 			<h2 data-i18n="downloads.title">Downloads</h2>
 			<div data-downloads="day-counter"></div>

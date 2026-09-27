@@ -270,6 +270,253 @@
 		]));
 	}
 
+	// ---------------------------------------------------------------- description (Markdown from Modrinth)
+
+	// Images in descriptions are only loaded from Modrinth itself (see the privacy policy), others become a link
+	var IMAGE_HOSTS = ["cdn.modrinth.com"];
+
+	function isAllowedImage(src) {
+		try {
+			var url = new URL(src, location.href);
+			return url.protocol === "https:" && IMAGE_HOSTS.indexOf(url.hostname) >= 0;
+		} catch (e) {
+			return false;
+		}
+	}
+
+	var purifyReady = false;
+
+	function setUpPurify() {
+		if (purifyReady) {
+			return;
+		}
+		purifyReady = true;
+		// Runs on the inert copy while sanitizing, so blocked images are never requested
+		window.DOMPurify.addHook("afterSanitizeAttributes", function (node) {
+			if (node.tagName === "IMG") {
+				node.removeAttribute("srcset");
+				if (isAllowedImage(node.getAttribute("src") || "")) {
+					node.setAttribute("loading", "lazy");
+					node.setAttribute("decoding", "async");
+					node.setAttribute("referrerpolicy", "no-referrer");
+				} else {
+					node.setAttribute("data-blocked-src", node.getAttribute("src") || "");
+					node.removeAttribute("src");
+				}
+			} else if (node.tagName === "A" && node.hasAttribute("href")) {
+				node.setAttribute("rel", "nofollow noopener ugc");
+				node.removeAttribute("target");
+			}
+		});
+	}
+
+	/** Modrinth descriptions are Markdown with HTML mixed in; returns a safe DOM fragment. */
+	function markdownToFragment(markdown) {
+		setUpPurify();
+		var fragment = window.DOMPurify.sanitize(window.marked.parse(markdown, { gfm: true }), {
+			RETURN_DOM_FRAGMENT: true,
+			FORBID_TAGS: ["style", "form", "input", "button", "textarea", "select", "video", "audio", "source", "track", "picture"],
+			FORBID_ATTR: ["style"]
+		});
+		fragment.querySelectorAll("img[data-blocked-src]").forEach(function (img) {
+			img.replaceWith(el("a", {
+				href: img.getAttribute("data-blocked-src"),
+				rel: "nofollow noopener ugc",
+				text: img.getAttribute("alt") || t("description.image")
+			}));
+		});
+		return fragment;
+	}
+
+	/**
+	 * [data-description="<mod id>"] holds a fallback text in both languages.
+	 * It is replaced by the Modrinth description once that is loaded, and shown again if there is none.
+	 */
+	function renderDescription(container, mod, data) {
+		if (container.getAttribute("data-rendered") === "true") {
+			return;
+		}
+		var output = container.querySelector(".md");
+		if (!output) {
+			output = el("div", { "class": "md" });
+			container.appendChild(output);
+		}
+		output.textContent = "";
+		container.classList.remove("is-loading");
+
+		var body = data && data.project && data.project.body;
+		if (!body || !window.marked || !window.DOMPurify) {
+			container.classList.remove("from-modrinth");
+			return;
+		}
+		try {
+			output.appendChild(markdownToFragment(body));
+		} catch (error) {
+			console.warn("Could not show the Modrinth description of " + mod.slug, error);
+			output.textContent = "";
+			return;
+		}
+		container.classList.add("from-modrinth");
+		// The text itself does not depend on the site language, so it is only drawn once
+		container.setAttribute("data-rendered", "true");
+	}
+
+	// ---------------------------------------------------------------- gallery (images from Modrinth)
+
+	var ARROWS = {
+		prev: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg>',
+		next: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>'
+	};
+
+	var galleries = {};
+
+	function galleryImages(data) {
+		var images = data && data.project && data.project.gallery ? data.project.gallery.slice() : [];
+		return images.sort(function (a, b) {
+			return (a.ordering - b.ordering) || (Date.parse(a.created) - Date.parse(b.created));
+		});
+	}
+
+	function navButton(direction) {
+		var button = el("button", { type: "button", "class": "gallery-nav " + direction });
+		button.innerHTML = ARROWS[direction];
+		return button;
+	}
+
+	/** One big image with buttons to step through, thumbnails below. Returns { update } for language changes. */
+	function buildGallery(section, images) {
+		var index = 0;
+		var image = el("img", { "class": "gallery-image", alt: "", decoding: "async", referrerpolicy: "no-referrer" });
+		var full = el("a", { "class": "gallery-full", target: "_blank", rel: "noopener" }, [image]);
+		var prev = navButton("prev");
+		var next = navButton("next");
+		var stage = el("div", { "class": "gallery-stage" }, [full, prev, next]);
+		var caption = el("div", { "class": "gallery-caption" });
+		var counter = el("div", { "class": "gallery-counter", "aria-live": "polite" });
+		var thumbs = el("div", { "class": "gallery-thumbs" });
+		var gallery = el("div", {
+			"class": "gallery panel" + (images.length === 1 ? " single" : ""),
+			role: "region",
+			"aria-roledescription": "carousel",
+			tabindex: "0"
+		}, [stage, el("div", { "class": "gallery-bar" }, [caption, counter]), thumbs]);
+
+		var thumbButtons = images.map(function (item, i) {
+			var button = el("button", { type: "button", "class": "gallery-thumb" }, [
+				el("img", { src: item.url, alt: "", loading: "lazy", decoding: "async", referrerpolicy: "no-referrer" })
+			]);
+			button.addEventListener("click", function () {
+				show(i);
+			});
+			thumbs.appendChild(button);
+			return button;
+		});
+
+		function source(item) {
+			return item.raw_url || item.url;
+		}
+
+		function show(i) {
+			index = (i + images.length) % images.length;
+			var item = images[index];
+			if (image.getAttribute("src") !== source(item)) {
+				stage.classList.add("is-loading");
+				image.classList.remove("pixelated");
+				image.src = source(item);
+				full.href = source(item);
+			}
+			caption.textContent = "";
+			if (item.title) {
+				caption.appendChild(el("strong", { text: item.title }));
+			}
+			if (item.description) {
+				caption.appendChild(el("span", { text: item.description }));
+			}
+			update();
+		}
+
+		function update() {
+			var item = images[index];
+			image.alt = item.title || item.description || t("gallery.image", { n: index + 1 });
+			gallery.setAttribute("aria-label", t("gallery.title"));
+			full.setAttribute("title", t("gallery.full"));
+			prev.setAttribute("aria-label", t("gallery.prev"));
+			next.setAttribute("aria-label", t("gallery.next"));
+			counter.textContent = t("gallery.count", { n: index + 1, total: images.length });
+			thumbButtons.forEach(function (button, i) {
+				button.setAttribute("aria-label", t("gallery.show", { n: i + 1 }));
+				button.setAttribute("aria-current", i === index ? "true" : "false");
+			});
+		}
+
+		image.addEventListener("load", function () {
+			stage.classList.remove("is-loading");
+			// Small screenshots are scaled up like the game does it: sharp pixels instead of a blur
+			var scale = Math.min(stage.clientWidth / image.naturalWidth, stage.clientHeight / image.naturalHeight);
+			image.classList.toggle("pixelated", scale > 1.5);
+			// Load the next image in the background so stepping through feels instant
+			if (images.length > 1) {
+				new Image().src = source(images[(index + 1) % images.length]);
+			}
+		});
+		image.addEventListener("error", function () {
+			stage.classList.remove("is-loading");
+		});
+
+		prev.addEventListener("click", function () {
+			show(index - 1);
+		});
+		next.addEventListener("click", function () {
+			show(index + 1);
+		});
+		gallery.addEventListener("keydown", function (event) {
+			if (images.length < 2) {
+				return;
+			}
+			if (event.key === "ArrowLeft") {
+				show(index - 1);
+			} else if (event.key === "ArrowRight") {
+				show(index + 1);
+			} else {
+				return;
+			}
+			event.preventDefault();
+		});
+
+		// Swipe on touch screens
+		var touchX = null;
+		stage.addEventListener("touchstart", function (event) {
+			touchX = event.touches.length === 1 ? event.touches[0].clientX : null;
+		}, { passive: true });
+		stage.addEventListener("touchend", function (event) {
+			if (touchX === null) {
+				return;
+			}
+			var distance = event.changedTouches[0].clientX - touchX;
+			touchX = null;
+			if (Math.abs(distance) > 40 && images.length > 1) {
+				show(distance < 0 ? index + 1 : index - 1);
+			}
+		});
+
+		section.appendChild(gallery);
+		show(0);
+		return { update: update };
+	}
+
+	/** [data-gallery="<mod id>"] stays hidden unless the project has images on Modrinth. */
+	function renderGallery(section, mod, data) {
+		if (galleries[mod.id]) {
+			galleries[mod.id].update();
+			return;
+		}
+		var images = galleryImages(data);
+		section.hidden = images.length === 0;
+		if (images.length > 0) {
+			galleries[mod.id] = buildGallery(section, images);
+		}
+	}
+
 	// ---------------------------------------------------------------- page wiring
 
 	var results = {};
@@ -301,6 +548,20 @@
 			}
 		});
 
+		document.querySelectorAll("[data-description]").forEach(function (container) {
+			var mod = site.MODS.find(function (m) { return m.id === container.getAttribute("data-description"); });
+			if (mod && mod.id in results) {
+				renderDescription(container, mod, results[mod.id]);
+			}
+		});
+
+		document.querySelectorAll("[data-gallery]").forEach(function (section) {
+			var mod = site.MODS.find(function (m) { return m.id === section.getAttribute("data-gallery"); });
+			if (mod && mod.id in results) {
+				renderGallery(section, mod, results[mod.id]);
+			}
+		});
+
 		document.querySelectorAll("[data-modrinth-link]").forEach(function (link) {
 			var mod = site.MODS.find(function (m) { return m.id === link.getAttribute("data-modrinth-link"); });
 			if (mod && mod.slug) {
@@ -315,6 +576,13 @@
 		document.querySelectorAll("[data-latest-releases], [data-downloads]").forEach(function (container) {
 			container.innerHTML = "";
 			container.appendChild(el("div", { "class": "loading", "data-i18n": "modrinth.loading", text: t("modrinth.loading") }));
+		});
+		// The fallback text stays in the page (for search engines and without JavaScript), it is only hidden while loading
+		document.querySelectorAll("[data-description]").forEach(function (container) {
+			container.classList.add("is-loading");
+			container.appendChild(el("div", { "class": "md" }, [
+				el("div", { "class": "loading", "data-i18n": "modrinth.loading", text: t("modrinth.loading") })
+			]));
 		});
 	}
 

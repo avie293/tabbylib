@@ -43,6 +43,7 @@
 	--code-bg: rgba(0, 0, 0, 0.45);
 	--code-border: rgba(255, 255, 255, 0.12);
 	--error: #ff6b6b;
+	--stage-bg: rgba(0, 0, 0, 0.45);
 
 	/* Modern controls (top bar dropdowns) */
 	--control-bg: rgba(0, 0, 0, 0.4);
@@ -73,6 +74,7 @@
 	--code-bg: rgba(255, 255, 255, 0.75);
 	--code-border: rgba(0, 0, 0, 0.12);
 	--error: #b3261e;
+	--stage-bg: rgba(0, 0, 0, 0.08);
 
 	--control-bg: rgba(255, 255, 255, 0.7);
 	--control-bg-hover: rgba(255, 255, 255, 0.95);
@@ -549,6 +551,14 @@ table.doc th {
 	background: var(--accent-soft);
 }
 
+.note p {
+	margin: 0 0 6px;
+}
+
+.note p:last-child {
+	margin-bottom: 0;
+}
+
 .placeholder {
 	color: var(--error);
 	font-weight: 700;
@@ -559,6 +569,256 @@ table.doc th {
 	flex-wrap: wrap;
 	gap: 6px;
 	margin: 0 0 8px;
+}
+
+/* ---------------------------------------------------------------- description from Modrinth (mod pages) */
+
+/* The fallback text is hidden while the Modrinth description loads and once it is there */
+[data-description].is-loading > [data-lang],
+[data-description].from-modrinth > [data-lang] {
+	display: none !important;
+}
+
+.md > :first-child {
+	margin-top: 0;
+}
+
+.md h1,
+.md h2,
+.md h3,
+.md h4,
+.md h5,
+.md h6 {
+	margin: 22px 0 10px;
+	line-height: 1.3;
+	color: var(--text);
+}
+
+.md h1 {
+	font-size: 22px;
+}
+
+.md h2 {
+	font-size: 19px;
+}
+
+.md h3 {
+	font-size: 17px;
+}
+
+.md h4,
+.md h5,
+.md h6 {
+	font-size: 16px;
+}
+
+.content .md h2::before {
+	content: none;
+}
+
+/* An empty heading ("##") is used as a divider on Modrinth */
+.md :is(h1, h2, h3, h4, h5, h6):empty,
+.md hr {
+	height: 0;
+	margin: 18px 0;
+	border: 0;
+	border-top: 1px solid var(--separator);
+}
+
+.md blockquote {
+	margin: 0 0 12px;
+	padding: 8px 12px;
+	border-left: 3px solid var(--accent);
+	background: var(--accent-soft);
+}
+
+.md blockquote > :last-child {
+	margin-bottom: 0;
+}
+
+.md img {
+	height: auto;
+	vertical-align: middle;
+	border-radius: 4px;
+}
+
+.md table {
+	display: block;
+	max-width: 100%;
+	overflow-x: auto;
+	margin: 0 0 12px;
+	border-collapse: collapse;
+}
+
+.md th,
+.md td {
+	padding: 6px 8px;
+	border: 1px solid var(--separator);
+	text-align: left;
+}
+
+.md details {
+	margin: 0 0 12px;
+}
+
+.md summary {
+	cursor: pointer;
+	font-weight: 600;
+}
+
+/* ---------------------------------------------------------------- gallery (mod pages) */
+
+.gallery {
+	padding: 10px;
+}
+
+.gallery:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
+.gallery-stage {
+	position: relative;
+	aspect-ratio: 16 / 9;
+	background: var(--stage-bg);
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.gallery-full {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.gallery-image {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	transition: opacity 0.2s;
+}
+
+.gallery-image.pixelated {
+	image-rendering: pixelated;
+}
+
+.gallery-stage.is-loading .gallery-image {
+	opacity: 0.35;
+}
+
+.gallery-nav {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	color: var(--text);
+	background: var(--menu-bg);
+	border: 1px solid var(--control-border);
+	border-radius: 8px;
+	box-shadow: var(--menu-shadow);
+	cursor: pointer;
+	transition: background-color 0.15s, border-color 0.15s;
+}
+
+.gallery-nav.prev {
+	left: 10px;
+}
+
+.gallery-nav.next {
+	right: 10px;
+}
+
+.gallery-nav:hover {
+	border-color: var(--accent);
+}
+
+.gallery-nav:focus-visible {
+	border-color: var(--accent);
+	outline: 2px solid var(--accent-soft);
+}
+
+.gallery-nav svg {
+	width: 18px;
+	height: 18px;
+}
+
+.gallery-bar {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 8px 2px 0;
+	font-size: 14px;
+	color: var(--text-muted);
+}
+
+.gallery-caption {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0 8px;
+	min-width: 0;
+}
+
+.gallery-caption strong {
+	color: var(--text);
+}
+
+.gallery-counter {
+	margin-left: auto;
+	flex: none;
+	font-variant-numeric: tabular-nums;
+}
+
+.gallery-thumbs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	padding-top: 8px;
+}
+
+.gallery-thumb {
+	width: 96px;
+	aspect-ratio: 16 / 9;
+	padding: 0;
+	background: var(--stage-bg);
+	border: 2px solid transparent;
+	border-radius: 4px;
+	overflow: hidden;
+	cursor: pointer;
+	opacity: 0.7;
+	transition: opacity 0.15s, border-color 0.15s;
+}
+
+.gallery-thumb img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.gallery-thumb:hover,
+.gallery-thumb:focus-visible {
+	opacity: 1;
+	outline: none;
+	border-color: var(--control-border);
+}
+
+.gallery-thumb[aria-current="true"] {
+	opacity: 1;
+	border-color: var(--accent);
+}
+
+/* Only one image: nothing to step through */
+.gallery.single .gallery-nav,
+.gallery.single .gallery-counter,
+.gallery.single .gallery-thumbs {
+	display: none;
 }
 
 /* ---------------------------------------------------------------- latest releases (home) */
@@ -805,7 +1065,10 @@ table.doc th {
 
 	.dropdown-button,
 	.dropdown-button .chevron,
-	.mc-button {
+	.mc-button,
+	.gallery-image,
+	.gallery-nav,
+	.gallery-thumb {
 		transition: none;
 	}
 }

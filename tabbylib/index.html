@@ -5,11 +5,13 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>TabbyLib</title>
 	<meta name="description" content="TabbyLib - config library for Minecraft mods. Downloads for Fabric, NeoForge and Forge.">
-	<link rel="icon" type="image/png" href="/assets/img/favicon.png?v=3">
-	<link rel="stylesheet" href="/assets/css/style.css?v=3">
-	<script src="/assets/js/boot.js?v=3"></script>
-	<script src="/assets/js/site.js?v=3" defer></script>
-	<script src="/assets/js/modrinth.js?v=3" defer></script>
+	<link rel="icon" type="image/png" href="/assets/img/favicon.png?v=4">
+	<link rel="stylesheet" href="/assets/css/style.css?v=4">
+	<script src="/assets/js/boot.js?v=4"></script>
+	<script src="/assets/js/site.js?v=4" defer></script>
+	<script src="/assets/js/vendor/marked.umd.js" defer></script>
+	<script src="/assets/js/vendor/purify.min.js" defer></script>
+	<script src="/assets/js/modrinth.js?v=4" defer></script>
 </head>
 <body data-page="mod" data-mod="tabbylib" data-title-de="TabbyLib – Download" data-title-en="TabbyLib – Download">
 <div class="layout">
@@ -35,7 +37,7 @@
 				</div>
 			</div>
 
-			<div class="prose">
+			<div class="prose" data-description="tabbylib">
 				<div data-lang="de">
 					<p>
 						TabbyLib stellt Mods ein gemeinsames Einstellungsmenü bereit. Spieler erreichen es über den Button
@@ -53,6 +55,10 @@
 					</p>
 				</div>
 			</div>
+
+			<section data-gallery="tabbylib" hidden>
+				<h2 data-i18n="gallery.title">Gallery</h2>
+			</section>
 
 			<h2 data-i18n="downloads.title">Downloads</h2>
 			<div data-downloads="tabbylib"></div>
