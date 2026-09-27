@@ -76,12 +76,19 @@ public final class TabbyConfig {
 		}
 	}
 
+	/**
+	 * Starts a new config.
+	 *
+	 * @param modId the id of your mod on the running loader. It is used to find the name, version and icon
+	 *              of your mod, and as default for the file name and the translation id
+	 */
 	public static Builder builder(String modId) {
 		return new Builder(modId);
 	}
 
 	// ---------------------------------------------------------------- info
 
+	/** The mod id given to {@link #builder(String)}. */
 	public String getModId() {
 		return this.modId;
 	}
@@ -91,11 +98,12 @@ public final class TabbyConfig {
 		return this.translationId;
 	}
 
+	/** The file the config is saved in: {@code config/<file name>.json}. */
 	public Path getFile() {
 		return this.file;
 	}
 
-	/** Mod name from fabric.mod.json, unless overridden in the builder. */
+	/** Mod name from the mod metadata (fabric.mod.json / mods.toml), unless overridden in the builder. */
 	public Component getDisplayName() {
 		if (this.customName != null) {
 			return this.customName;
@@ -103,10 +111,12 @@ public final class TabbyConfig {
 		return Component.literal(this.modInfo().map(ModInfo::name).orElse(this.modId));
 	}
 
+	/** Version of the mod from the loader's metadata, empty when it is unknown. */
 	public String getVersion() {
 		return this.modInfo().map(ModInfo::version).orElse("");
 	}
 
+	/** The icon set with {@link Builder#icon}, or null to use the icon from the mod metadata. */
 	public @Nullable Identifier getCustomIcon() {
 		return this.customIcon;
 	}
@@ -116,20 +126,24 @@ public final class TabbyConfig {
 		return Platform.mod(this.modId);
 	}
 
+	/** The categories (tabs) in display order. */
 	public List<ConfigCategory> getCategories() {
 		return this.categories;
 	}
 
+	/** Every option of this config, including the ones inside groups. */
 	public java.util.Collection<Option<?>> getOptions() {
 		return Collections.unmodifiableCollection(this.optionsByKey.values());
 	}
 
+	/** Finds an option by its key, or null. */
 	public @Nullable Option<?> getOption(String key) {
 		return this.optionsByKey.get(key);
 	}
 
 	// ---------------------------------------------------------------- editing (used by the screen)
 
+	/** Whether the config screen has unsaved changes for this config. */
 	public boolean hasChanges() {
 		for (Option<?> option : this.optionsByKey.values()) {
 			if (option.isDirty()) {
@@ -160,6 +174,7 @@ public final class TabbyConfig {
 		return restart;
 	}
 
+	/** Throws away all unsaved changes of the config screen. */
 	public void discard() {
 		this.optionsByKey.values().forEach(Option::discard);
 	}
@@ -171,6 +186,13 @@ public final class TabbyConfig {
 
 	// ---------------------------------------------------------------- file
 
+	/**
+	 * Reads the file and replaces the current values. {@link Builder#build()} already does this, call it
+	 * yourself only to reload a file that was changed while the game is running.
+	 * <p>
+	 * Missing options are written back with their defaults. A file that can not be read is backed up as
+	 * {@code <file name>.json.broken} and replaced by the defaults.
+	 */
 	public void load() {
 		if (!Files.exists(this.file)) {
 			this.save();
@@ -230,6 +252,10 @@ public final class TabbyConfig {
 		return true;
 	}
 
+	/**
+	 * Writes all values to the file and runs the {@link Builder#onSave} listeners.
+	 * Keys in the file that this config does not know are kept.
+	 */
 	public void save() {
 		JsonObject json = new JsonObject();
 		// Keeps unknown keys of the old file, e.g. from a newer mod version
@@ -281,6 +307,7 @@ public final class TabbyConfig {
 
 	// ---------------------------------------------------------------- builder
 
+	/** Builder for a {@link TabbyConfig}, created with {@link TabbyConfig#builder(String)}. */
 	public static final class Builder {
 		private final String modId;
 		private String translationId;
@@ -312,23 +339,28 @@ public final class TabbyConfig {
 			return this;
 		}
 
-		/** Overrides the name shown in the mod list. Defaults to the name in fabric.mod.json. */
+		/** Overrides the name shown in the mod list. Defaults to the name in the mod metadata. */
 		public Builder name(Component name) {
 			this.name = name;
 			return this;
 		}
 
-		/** Overrides the icon (a texture, e.g. {@code mymod:textures/gui/icon.png}). Defaults to the icon of fabric.mod.json. */
+		/** Overrides the icon (a texture, e.g. {@code mymod:textures/gui/icon.png}). Defaults to the icon / logo in the mod metadata. */
 		public Builder icon(Identifier icon) {
 			this.icon = icon;
 			return this;
 		}
 
+		/** Adds a category you created yourself. */
 		public Builder category(ConfigCategory category) {
 			this.categories.add(category);
 			return this;
 		}
 
+		/**
+		 * Adds a new category (tab) and fills it:
+		 * {@code .category("general", category -> category.add(SHOW_HUD, COLOR))}.
+		 */
 		public Builder category(String key, Consumer<ConfigCategory> content) {
 			ConfigCategory category = new ConfigCategory(key);
 			content.accept(category);
