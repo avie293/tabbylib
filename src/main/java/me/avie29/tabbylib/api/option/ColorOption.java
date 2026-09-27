@@ -18,11 +18,17 @@ public class ColorOption extends Option<Integer> {
 		this.alpha = builder.alpha;
 	}
 
-	/** @param defaultColor ARGB, e.g. {@code 0xFFFF0000} for opaque red. Without alpha support the alpha byte is forced to FF. */
+	/**
+	 * Starts a new color option.
+	 *
+	 * @param key          unique key inside the config, used in the file and in the translation key
+	 * @param defaultColor ARGB, e.g. {@code 0xFFFF0000} for opaque red. Without alpha support the alpha byte is forced to FF.
+	 */
 	public static Builder builder(String key, int defaultColor) {
 		return new Builder(key, defaultColor);
 	}
 
+	/** Whether the alpha channel (transparency) can be edited. */
 	public boolean hasAlpha() {
 		return this.alpha;
 	}
@@ -37,6 +43,7 @@ public class ColorOption extends Option<Integer> {
 		return toHex(value, this.alpha);
 	}
 
+	/** Formats a color as {@code #RRGGBB}, or {@code #AARRGGBB} with alpha. */
 	public static String toHex(int color, boolean alpha) {
 		return alpha
 			? String.format(Locale.ROOT, "#%08X", color)
@@ -86,6 +93,7 @@ public class ColorOption extends Option<Integer> {
 		return parsed;
 	}
 
+	/** Builder for {@link ColorOption}. The shared settings are in {@link Option.Builder}. */
 	public static class Builder extends Option.Builder<Integer, Builder> {
 		private boolean alpha;
 

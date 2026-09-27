@@ -8,7 +8,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The few Minecraft calls that differ between versions. Each Minecraft version gets its own copy of this
- * class (see tools/sync_ports.py), everything else stays identical.
+ * class (see tools/ports.py), everything else stays identical. Internal, not part of the API.
  */
 public final class McCompat {
 	private McCompat() {

@@ -17,6 +17,7 @@ minecraft {
 	runs {
 		configureEach {
 			workingDir = layout.projectDirectory.dir('run')
+			args '--mixin.config', 'tabbylib.mixins.json'
 		}
 		register('client')
 	}
@@ -55,21 +56,17 @@ java {
 	withSourcesJar()
 }
 
+jar {
+	manifest {
+		attributes 'MixinConfigs': 'tabbylib.mixins.json'
+	}
+}
+
 publishing {
 	publications {
 		create("mavenJava", MavenPublication) {
 			artifactId = "tabbylib-forge"
 			from components.java
-		}
-	}
-}
-
-// Public maven repository (the TabbyLib website, served by GitHub Pages). Filled by "gradlew publish".
-publishing {
-	repositories {
-		maven {
-			name = "website"
-			url = rootProject.file("../../TabbyLib-Website/maven").toURI()
 		}
 	}
 }

@@ -12,7 +12,8 @@ import org.jspecify.annotations.Nullable;
  * searching through the controls menu. The key itself is still stored in options.txt,
  * so it stays in sync with the vanilla controls screen.
  * <p>
- * Client only. Register the mapping with Fabric's {@code KeyMappingHelper} as usual.
+ * Client only. Register the mapping with your loader as usual (Fabric: {@code KeyMappingHelper},
+ * NeoForge / Forge: {@code RegisterKeyMappingsEvent}).
  */
 public class KeyBindOption extends Option<InputConstants.Key> {
 	private final KeyMapping mapping;
@@ -22,10 +23,17 @@ public class KeyBindOption extends Option<InputConstants.Key> {
 		this.mapping = builder.mapping;
 	}
 
+	/**
+	 * Shows a key mapping in the config screen.
+	 *
+	 * @param key     unique key inside the config, used in the translation key
+	 * @param mapping the key mapping, registered with your loader as usual
+	 */
 	public static Builder builder(String key, KeyMapping mapping) {
 		return new Builder(key, mapping);
 	}
 
+	/** The vanilla key mapping this option edits. */
 	public KeyMapping getMapping() {
 		return this.mapping;
 	}
@@ -60,6 +68,7 @@ public class KeyBindOption extends Option<InputConstants.Key> {
 		return InputConstants.getKey(json.getAsString());
 	}
 
+	/** Builder for {@link KeyBindOption}. The shared settings are in {@link Option.Builder}. */
 	public static class Builder extends Option.Builder<InputConstants.Key, Builder> {
 		private final KeyMapping mapping;
 
