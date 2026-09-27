@@ -22,19 +22,27 @@ public class EnumOption<E extends Enum<E>> extends Option<E> {
 		this.formatter = builder.formatter;
 	}
 
+	/**
+	 * Starts a new enum option. The enum type is taken from the default value.
+	 *
+	 * @param key unique key inside the config, used in the file and in the translation key
+	 */
 	public static <E extends Enum<E>> Builder<E> builder(String key, E defaultValue) {
 		return new Builder<>(key, defaultValue);
 	}
 
+	/** All constants of the enum, in declaration order. */
 	public E[] values() {
 		return this.enumClass.getEnumConstants();
 	}
 
+	/** The next (direction 1) or previous (direction -1) constant, wrapping around at the ends. */
 	public E cycle(E current, int direction) {
 		E[] values = this.values();
 		return values[Math.floorMod(current.ordinal() + direction, values.length)];
 	}
 
+	/** Display text of a constant: from the {@link Builder#formatter}, the translation key or the constant name. */
 	public Component valueText(E value) {
 		if (this.formatter != null) {
 			return this.formatter.apply(value);
@@ -63,6 +71,7 @@ public class EnumOption<E extends Enum<E>> extends Option<E> {
 		return Enum.valueOf(this.enumClass, json.getAsString());
 	}
 
+	/** Builder for {@link EnumOption}. The shared settings are in {@link Option.Builder}. */
 	public static class Builder<E extends Enum<E>> extends Option.Builder<E, Builder<E>> {
 		private final Class<E> enumClass;
 		private @Nullable Function<E, Component> formatter;
@@ -72,6 +81,7 @@ public class EnumOption<E extends Enum<E>> extends Option<E> {
 			this.enumClass = defaultValue.getDeclaringClass();
 		}
 
+		/** Custom display text per constant instead of translation keys. */
 		public Builder<E> formatter(Function<E, Component> formatter) {
 			this.formatter = formatter;
 			return this;

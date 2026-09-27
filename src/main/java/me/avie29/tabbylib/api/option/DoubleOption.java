@@ -26,26 +26,36 @@ public class DoubleOption extends Option<Double> {
 		this.formatter = builder.formatter;
 	}
 
+	/**
+	 * Starts a new decimal number option.
+	 *
+	 * @param key unique key inside the config, used in the file and in the translation key
+	 */
 	public static Builder builder(String key, double defaultValue) {
 		return new Builder(key, defaultValue);
 	}
 
+	/** Smallest allowed value. */
 	public double getMin() {
 		return this.min;
 	}
 
+	/** Largest allowed value. */
 	public double getMax() {
 		return this.max;
 	}
 
+	/** Values snap to multiples of this step (counted from the minimum), 0 for no snapping. */
 	public double getStep() {
 		return this.step;
 	}
 
+	/** Whether the screen shows a slider (else a text field). */
 	public boolean isSlider() {
 		return this.slider;
 	}
 
+	/** Text shown for a value, from the {@link Builder#formatter} if one is set. */
 	public Component valueText(double value) {
 		return this.formatter != null ? this.formatter.apply(value) : Component.literal(this.formatValue(value));
 	}
@@ -82,6 +92,7 @@ public class DoubleOption extends Option<Double> {
 		return json.getAsDouble();
 	}
 
+	/** Builder for {@link DoubleOption}. The shared settings are in {@link Option.Builder}. */
 	public static class Builder extends Option.Builder<Double, Builder> {
 		private double min = -Double.MAX_VALUE;
 		private double max = Double.MAX_VALUE;
@@ -93,12 +104,14 @@ public class DoubleOption extends Option<Double> {
 			super(key, defaultValue);
 		}
 
+		/** Allowed range, edited with a text field. */
 		public Builder range(double min, double max) {
 			this.min = min;
 			this.max = max;
 			return this;
 		}
 
+		/** Allowed range, edited with a slider that snaps to the step. */
 		public Builder slider(double min, double max, double step) {
 			this.range(min, max);
 			this.step = step;
@@ -106,6 +119,7 @@ public class DoubleOption extends Option<Double> {
 			return this;
 		}
 
+		/** How the value is displayed on the slider, e.g. {@code v -> Component.literal(v + "x")}. */
 		public Builder formatter(Function<Double, Component> formatter) {
 			this.formatter = formatter;
 			return this;
