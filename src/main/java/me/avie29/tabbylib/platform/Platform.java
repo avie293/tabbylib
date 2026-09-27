@@ -31,9 +31,16 @@ public final class Platform {
 	}
 
 	private static ModInfo toInfo(IModInfo info) {
-		return new ModInfo(info.getModId(), info.getDisplayName(), info.getVersion().toString(), info.getLogoFile(), path -> {
+		return new ModInfo(info.getModId(), info.getDisplayName(), info.getVersion().toString(), iconFile(info), path -> {
 			var contents = info.getOwningFile().getFile().getContents();
 			return contents.findFile(path).isPresent() ? Optional.of(contents.openFile(path)) : Optional.empty();
 		});
+	}
+
+	/** Square "iconFile" like NeoForge's mod list, falling back to the deprecated "logoFile". */
+	private static Optional<String> iconFile(IModInfo info) {
+		return info.getConfig().<String>getConfigElement("iconFile")
+			.or(() -> info.getOwningFile().getConfig().getConfigElement("iconFile"))
+			.or(info::getLogoFile);
 	}
 }
