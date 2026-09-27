@@ -1,0 +1,89 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "me.avie29.tabbylib",
+    "module": "tabbylib-forge",
+    "version": "1.0.0+26.1.1",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.3.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 25,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "files": [
+        {
+          "name": "tabbylib-forge-1.0.0+26.1.1.jar",
+          "url": "tabbylib-forge-1.0.0+26.1.1.jar",
+          "size": 615410,
+          "sha512": "acfbee506ffb00ccb58682d9c91231ae68b1349db71127548c510f7488347bae85deaeedb980c933b01cd24616eab176de6d9f0ca5e6700ae150832eaac071f4",
+          "sha256": "900a8b3b9805d1dace12904e3d0c4bb2aadce1a3e4cd0cc70a752a022c288bc6",
+          "sha1": "d6cf926089a93819884ba8f8444d22aae457d9c4",
+          "md5": "66be1e60753185afea4827d43f959f7e"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 25,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "net.minecraftforge",
+          "module": "forge",
+          "version": {
+            "requires": "26.1.1-63.0.2"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "tabbylib-forge-1.0.0+26.1.1.jar",
+          "url": "tabbylib-forge-1.0.0+26.1.1.jar",
+          "size": 615410,
+          "sha512": "acfbee506ffb00ccb58682d9c91231ae68b1349db71127548c510f7488347bae85deaeedb980c933b01cd24616eab176de6d9f0ca5e6700ae150832eaac071f4",
+          "sha256": "900a8b3b9805d1dace12904e3d0c4bb2aadce1a3e4cd0cc70a752a022c288bc6",
+          "sha1": "d6cf926089a93819884ba8f8444d22aae457d9c4",
+          "md5": "66be1e60753185afea4827d43f959f7e"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "tabbylib-forge-1.0.0+26.1.1-sources.jar",
+          "url": "tabbylib-forge-1.0.0+26.1.1-sources.jar",
+          "size": 530532,
+          "sha512": "6473d418f922f9b9f5808aa74574cf181a1dbbbb20750f2ea37be91dd710752ee5b93e8f342056b0e76db75dc9ce2e432d78b6e0be68249f68ccb1036840448f",
+          "sha256": "0d99c9be1f847deb5d4aab7fd975a966dd0c98bccea3f2bbfea0a45709443187",
+          "sha1": "14de30076c0a8cad2cd1b6447815d4f50aa846b7",
+          "md5": "aba7f9deafa2b3ab06719db99f6edd05"
+        }
+      ]
+    }
+  ]
+}

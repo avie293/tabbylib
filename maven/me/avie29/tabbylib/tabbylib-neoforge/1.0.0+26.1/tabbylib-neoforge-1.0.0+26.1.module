@@ -1,0 +1,80 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "me.avie29.tabbylib",
+    "module": "tabbylib-neoforge",
+    "version": "1.0.0+26.1",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.2.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 25,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "files": [
+        {
+          "name": "tabbylib-neoforge-1.0.0+26.1.jar",
+          "url": "tabbylib-neoforge-1.0.0+26.1.jar",
+          "size": 615000,
+          "sha512": "88d70d0bbcc7f23112633e830ec26e03feb994f3ce5625f5875b1cf2ba3f10aa46050c1b25b639c562641dd0215aae960b171f27c0620fc076d3df48e864898c",
+          "sha256": "715b35952cfbab4af8396ce843172745f7eab617ab5a5858b6ad77c9e358a08e",
+          "sha1": "54d06705033ad2eecb3bbc76aba49a53bf897822",
+          "md5": "1adf497f764736bee208a3cbaabb1357"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 25,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "tabbylib-neoforge-1.0.0+26.1.jar",
+          "url": "tabbylib-neoforge-1.0.0+26.1.jar",
+          "size": 615000,
+          "sha512": "88d70d0bbcc7f23112633e830ec26e03feb994f3ce5625f5875b1cf2ba3f10aa46050c1b25b639c562641dd0215aae960b171f27c0620fc076d3df48e864898c",
+          "sha256": "715b35952cfbab4af8396ce843172745f7eab617ab5a5858b6ad77c9e358a08e",
+          "sha1": "54d06705033ad2eecb3bbc76aba49a53bf897822",
+          "md5": "1adf497f764736bee208a3cbaabb1357"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "tabbylib-neoforge-1.0.0+26.1-sources.jar",
+          "url": "tabbylib-neoforge-1.0.0+26.1-sources.jar",
+          "size": 530379,
+          "sha512": "a31f30f0c8d168b7a1b920728404397676b49841e92e634348b7e30599cfd1da89ccc1f78af72c9a9a92a6d656be3886f1cdef51d1a776cb37903eb0921ebb15",
+          "sha256": "20392475bcace609788144e37ff6d7d968e99d25fe92371ce106b1df8b5ff65a",
+          "sha1": "a34e1b16926449c91d14b5b4ae4e74b19bc7c8f8",
+          "md5": "25604e24c100c0d8d2ff9b527fc778e3"
+        }
+      ]
+    }
+  ]
+}

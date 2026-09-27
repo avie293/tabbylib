@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>TabbyLib</title>
+	<meta name="description" content="TabbyLib - config library for Minecraft mods. Downloads for Fabric, NeoForge and Forge.">
+	<link rel="icon" type="image/png" href="/assets/img/favicon.png">
+	<link rel="stylesheet" href="/assets/css/style.css">
+	<script src="/assets/js/boot.js"></script>
+	<script src="/assets/js/site.js" defer></script>
+	<script src="/assets/js/modrinth.js" defer></script>
+</head>
+<body data-page="mod" data-mod="tabbylib" data-title-de="TabbyLib – Download" data-title-en="TabbyLib – Download">
+<div class="layout">
+	<header id="topbar" class="topbar panel"></header>
+
+	<div class="main">
+		<nav id="modlist" class="modlist panel" aria-label="Mods"></nav>
+
+		<main id="content" class="content panel">
+			<div class="content-header">
+				<img src="/assets/img/icons/tabbylib.png" alt="" width="56" height="56">
+				<div>
+					<h1>TabbyLib</h1>
+					<p class="subtitle">
+						<span data-lang="de">Config Bibliothek für Avies Mods</span>
+						<span data-lang="en">Config library for Avies mods</span>
+					</p>
+				</div>
+				<div class="actions">
+					<a class="mc-button small primary" href="/tabbylib/wiki/" data-i18n="link.wiki">Wiki</a>
+					<a class="mc-button small" href="#maven" data-i18n="link.maven">Maven</a>
+					<a class="mc-button small" data-modrinth-link="tabbylib" rel="noopener" data-i18n="link.modrinth">Modrinth</a>
+				</div>
+			</div>
+
+			<div class="prose">
+				<div data-lang="de">
+					<p>
+						TabbyLib stellt Mods ein gemeinsames Einstellungsmenü bereit. Spieler erreichen es über den Button
+						<strong>Tabby Config</strong> im Optionsmenü, mit <code>/tabbylib</code> oder – auf NeoForge und Forge – über
+						den „Config“-Button in der Mod-Liste. TabbyLib selbst fügt dem Spiel nichts hinzu; installiere es, wenn eine
+						Mod es braucht (z.&nbsp;B. Day Counter oder Ping Display).
+					</p>
+				</div>
+				<div data-lang="en">
+					<p>
+						TabbyLib gives mods one shared settings screen. Players open it with the <strong>Tabby Config</strong>
+						button in the options menu, with <code>/tabbylib</code> or – on NeoForge and Forge – with the "Config" button
+						in the mod list. TabbyLib itself adds nothing to the game; install it when a mod needs it (for example
+						Day Counter or Ping Display).
+					</p>
+				</div>
+			</div>
+
+			<h2 data-i18n="downloads.title">Downloads</h2>
+			<div data-downloads="tabbylib"></div>
+
+			<h2 id="maven">
+				<span data-lang="de">Für Mod-Entwickler</span>
+				<span data-lang="en">For mod developers</span>
+			</h2>
+			<div class="prose">
+				<div data-lang="de">
+					<p>TabbyLib liegt in einem eigenen Maven-Repository. Die Schritt-für-Schritt-Anleitung steht im <a href="/tabbylib/wiki/">Wiki</a>.</p>
+				</div>
+				<div data-lang="en">
+					<p>TabbyLib is available from its own maven repository. The step by step guide is in the <a href="/tabbylib/wiki/">wiki</a>.</p>
+				</div>
+			</div>
+<pre><code>repositories {
+    maven { url = "https://avie29.me/maven" }
+}
+
+dependencies {
+    // Fabric
+    implementation "me.avie29.tabbylib:tabbylib:1.0.0+26.1"
+    // NeoForge
+    implementation "me.avie29.tabbylib:tabbylib-neoforge:1.0.0+26.1"
+    // Forge
+    implementation "me.avie29.tabbylib:tabbylib-forge:1.0.0+26.1"
+}</code></pre>
+			<p><a class="mc-button" href="/tabbylib/wiki/">
+				<span data-lang="de">Zum Wiki</span>
+				<span data-lang="en">Open the wiki</span>
+			</a></p>
+		</main>
+	</div>
+
+	<footer id="footer" class="footer panel"></footer>
+</div>
+</body>
+</html>

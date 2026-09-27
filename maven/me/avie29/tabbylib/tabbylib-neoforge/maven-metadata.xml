@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>me.avie29.tabbylib</groupId>
+  <artifactId>tabbylib-neoforge</artifactId>
+  <versioning>
+    <latest>1.0.0+1.21.1</latest>
+    <release>1.0.0+1.21.1</release>
+    <versions>
+      <version>1.0.0+26.1</version>
+      <version>1.0.0+26.1.1</version>
+      <version>1.0.0+26.1.2</version>
+      <version>1.0.0+26.2</version>
+      <version>1.0.0+26.3</version>
+      <version>1.0.0+1.21.1</version>
+    </versions>
+    <lastUpdated>20260926135358</lastUpdated>
+  </versioning>
+</metadata>

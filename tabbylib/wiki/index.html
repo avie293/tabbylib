@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>TabbyLib Wiki</title>
+	<meta name="description" content="How to add a config to your Minecraft mod with TabbyLib on Fabric, NeoForge and Forge.">
+	<link rel="icon" type="image/png" href="/assets/img/favicon.png">
+	<link rel="stylesheet" href="/assets/css/style.css">
+	<script src="/assets/js/boot.js"></script>
+	<script src="/assets/js/site.js" defer></script>
+	<script src="/assets/js/modrinth.js" defer></script>
+</head>
+<body data-page="wiki" data-mod="tabbylib" data-title-de="TabbyLib Wiki – Config für deine Mod" data-title-en="TabbyLib Wiki – A config for your mod">
+<div class="layout">
+	<header id="topbar" class="topbar panel"></header>
+
+	<div class="main">
+		<nav id="modlist" class="modlist panel" aria-label="Mods"></nav>
+
+		<main id="content" class="content panel">
+			<div class="content-header">
+				<img src="/assets/img/icons/tabbylib.png" alt="" width="56" height="56">
+				<div>
+					<h1>TabbyLib Wiki</h1>
+					<p class="subtitle">
+						<span data-lang="de">So baust du mit TabbyLib eine Config für deine Mod</span>
+						<span data-lang="en">How to build a config for your mod with TabbyLib</span>
+					</p>
+				</div>
+				<div class="actions">
+					<a class="mc-button small" href="/tabbylib/">
+						<span data-lang="de">Zurück zu TabbyLib</span>
+						<span data-lang="en">Back to TabbyLib</span>
+					</a>
+				</div>
+			</div>
+
+			<nav class="toc" aria-label="Contents">
+				<a class="mc-button small" href="#setup">Setup</a>
+				<a class="mc-button small" href="#first-config"><span data-lang="de">Erste Config</span><span data-lang="en">First config</span></a>
+				<a class="mc-button small" href="#options"><span data-lang="de">Optionstypen</span><span data-lang="en">Option types</span></a>
+				<a class="mc-button small" href="#structure"><span data-lang="de">Aufbau</span><span data-lang="en">Structure</span></a>
+				<a class="mc-button small" href="#translations"><span data-lang="de">Übersetzungen</span><span data-lang="en">Translations</span></a>
+				<a class="mc-button small" href="#hud">HUD</a>
+				<a class="mc-button small" href="#advanced"><span data-lang="de">Fortgeschritten</span><span data-lang="en">Advanced</span></a>
+				<a class="mc-button small" href="#versions"><span data-lang="de">Versionen</span><span data-lang="en">Versions</span></a>
+			</nav>
+
+			<!-- ================================================================ setup -->
+			<h2 id="setup">Setup</h2>
+			<div class="prose">
+				<div data-lang="de">
+					<p>Füge das TabbyLib-Maven-Repository und die Abhängigkeit für deinen Loader in die <code>build.gradle</code> ein. Ersetze <code>26.1</code> durch deine Minecraft-Version.</p>
+				</div>
+				<div data-lang="en">
+					<p>Add the TabbyLib maven repository and the dependency for your loader to your <code>build.gradle</code>. Replace <code>26.1</code> with your Minecraft version.</p>
+				</div>
+			</div>
+<pre><code>repositories {
+    maven { url = "https://avie29.me/maven" }
+}
+
+dependencies {
+    // Fabric (on 1.21.1: modImplementation)
+    implementation "me.avie29.tabbylib:tabbylib:1.0.0+26.1"
+
+    // NeoForge
+    implementation "me.avie29.tabbylib:tabbylib-neoforge:1.0.0+26.1"
+
+    // Forge (on 1.20.1: implementation fg.deobf("me.avie29.tabbylib:tabbylib-forge:1.0.0+1.20.1"))
+    implementation "me.avie29.tabbylib:tabbylib-forge:1.0.0+26.1"
+}</code></pre>
+			<div class="prose">
+				<div data-lang="de">
+					<p>Trage TabbyLib außerdem als Abhängigkeit deiner Mod ein, damit Spieler einen Hinweis bekommen, wenn es fehlt:</p>
+				</div>
+				<div data-lang="en">
+					<p>Also add TabbyLib as a dependency of your mod, so players get a message when it is missing:</p>
+				</div>
+			</div>
+<pre><code>// fabric.mod.json
+"depends": {
+    "tabbylib": "&gt;=1.0.0"
+}
+
+# neoforge.mods.toml (NeoForge) / mods.toml (Forge: mandatory=true instead of type)
+[[dependencies.my_mod]]
+modId = "tabbylib"
+type = "required"
+versionRange = "[1.0.0,)"
+ordering = "AFTER"
+side = "CLIENT"</code></pre>
+
+			<!-- ================================================================ first config -->
+			<h2 id="first-config">
+				<span data-lang="de">Deine erste Config</span>
+				<span data-lang="en">Your first config</span>
+			</h2>
+			<div class="prose">
+				<div data-lang="de">
+					<p>
+						Jede Einstellung ist ein <code>Option</code>-Objekt. Lege sie als Konstanten an und fasse sie in einer
+						<code>TabbyConfig</code> zusammen. <code>build()</code> registriert die Config bei TabbyLib und lädt die Datei
+						<code>config/&lt;modid&gt;.json</code> – sie wird angelegt, wenn es sie noch nicht gibt.
+					</p>
+				</div>
+				<div data-lang="en">
+					<p>
+						Every setting is an <code>Option</code> object. Create them as constants and put them into a
+						<code>TabbyConfig</code>. <code>build()</code> registers the config with TabbyLib and loads the file
+						<code>config/&lt;modid&gt;.json</code> – it is created when it does not exist yet.
+					</p>
+				</div>
+			</div>
+<pre><code>public final class MyConfig {
+    public static final BooleanOption SHOW_HUD = BooleanOption.builder("showHud", true).build();
+    public static final IntOption SIZE = IntOption.builder("size", 10).slider(1, 50, 1).build();
+    public static final ColorOption COLOR = ColorOption.builder("color", 0xFFFFFFFF)
+        .alpha()
+        .dependsOn(SHOW_HUD)
+        .build();
+
+    private static TabbyConfig config;
+
+    // Call this in your client initializer (Fabric) / mod constructor (NeoForge, Forge)
+    public static void init() {
+        config = TabbyConfig.builder("my-mod")
+            .category("general", category -&gt; category
+                .add(SHOW_HUD)
+                .group("look", group -&gt; group.add(SIZE, COLOR)))
+            .build();
+    }
+
+    public static TabbyConfig get() {
+        return config;
+    }
+}</code></pre>
+			<div class="prose">
+				<div data-lang="de">
+					<p>Werte liest du mit <code>get()</code>. Änderst du einen Wert im Code, speichere die Config danach:</p>
+				</div>
+				<div data-lang="en">
+					<p>Read values with <code>get()</code>. When you change a value in code, save the config afterwards:</p>
+				</div>
+			</div>
+<pre><code>if (MyConfig.SHOW_HUD.get()) {
+    drawHud(MyConfig.SIZE.get(), MyConfig.COLOR.get());
+}
+
+MyConfig.SHOW_HUD.set(false);
+MyConfig.get().save();</code></pre>
+			<div class="note prose">
+				<div data-lang="de">
+					Im Config-Menü bearbeiten Spieler zuerst nur einen <em>vorläufigen</em> Wert (<code>getPending()</code>).
+					Erst „Speichern“ übernimmt ihn in <code>get()</code>. Für Vorschauen, die sofort reagieren sollen, nimm <code>getPending()</code>.
+				</div>
+				<div data-lang="en">
+					In the config screen players first only change a <em>pending</em> value (<code>getPending()</code>).
+					Only "Save" moves it into <code>get()</code>. Use <code>getPending()</code> for previews that should react right away.
+				</div>
+			</div>
+
+			<!-- ================================================================ options -->
+			<h2 id="options">
+				<span data-lang="de">Optionstypen</span>
+				<span data-lang="en">Option types</span>
+			</h2>
+			<div class="table-scroll">
+				<table class="doc prose">
+					<thead>
+					<tr>
+						<th>Option</th>
+						<th><span data-lang="de">Im Menü</span><span data-lang="en">In the screen</span></th>
+						<th><span data-lang="de">Beispiel</span><span data-lang="en">Example</span></th>
+					</tr>
+					</thead>
+					<tbody>
+					<tr>
+						<td><code>BooleanOption</code></td>
+						<td><span data-lang="de">An / Aus-Button</span><span data-lang="en">On / off button</span></td>
+						<td><code>BooleanOption.builder("enabled", true)</code></td>
+					</tr>
+					<tr>
+						<td><code>IntOption</code></td>
+						<td><span data-lang="de">Slider (<code>slider</code>) oder Eingabefeld (<code>range</code>)</span><span data-lang="en">Slider (<code>slider</code>) or text field (<code>range</code>)</span></td>
+						<td><code>IntOption.builder("size", 10).slider(1, 50, 1)</code></td>
+					</tr>
+					<tr>
+						<td><code>DoubleOption</code></td>
+						<td><span data-lang="de">Slider oder Eingabefeld für Kommazahlen</span><span data-lang="en">Slider or text field for decimals</span></td>
+						<td><code>DoubleOption.builder("scale", 1.0).slider(0.5, 3.0, 0.25)</code></td>
+					</tr>
+					<tr>
+						<td><code>StringOption</code></td>
+						<td><span data-lang="de">Textfeld, optional mit Prüfung</span><span data-lang="en">Text field, optionally validated</span></td>
+						<td><code>StringOption.builder("prefix", "Day").maxLength(32)</code></td>
+					</tr>
+					<tr>
+						<td><code>EnumOption</code></td>
+						<td><span data-lang="de">Button, der durch die Werte schaltet (Rechtsklick rückwärts)</span><span data-lang="en">Button that cycles through the values (right click goes back)</span></td>
+						<td><code>EnumOption.builder("mode", Mode.SIMPLE)</code></td>
+					</tr>
+					<tr>
+						<td><code>ColorOption</code></td>
+						<td><span data-lang="de">Hex-Feld und Farbwähler, mit <code>alpha()</code> auch Transparenz</span><span data-lang="en">Hex field and color picker, with <code>alpha()</code> also transparency</span></td>
+						<td><code>ColorOption.builder("color", 0xFFFF5555)</code></td>
+					</tr>
+					<tr>
+						<td><code>KeyBindOption</code></td>
+						<td><span data-lang="de">Tastenbelegung, gleich mit den Minecraft-Steuerungseinstellungen</span><span data-lang="en">Key binding, in sync with Minecraft's controls</span></td>
+						<td><code>KeyBindOption.builder("toggleKey", myKeyMapping)</code></td>
+					</tr>
+					<tr>
+						<td><code>StringListOption</code></td>
+						<td><span data-lang="de">Liste mit Hinzufügen, Entfernen und Sortieren</span><span data-lang="en">List with add, remove and reorder</span></td>
+						<td><code>StringListOption.builder("players", List.of())</code></td>
+					</tr>
+					<tr>
+						<td><code>HudPositionOption</code></td>
+						<td><span data-lang="de">Drag-&amp;-Drop-Editor mit Einrasten</span><span data-lang="en">Drag and drop editor with snapping</span></td>
+						<td><a href="#hud"><span data-lang="de">siehe HUD</span><span data-lang="en">see HUD</span></a></td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="prose">
+				<div data-lang="de">
+					<p>Alle Builder haben dieselben zusätzlichen Einstellungen:</p>
+				</div>
+				<div data-lang="en">
+					<p>Every builder shares these extra settings:</p>
+				</div>
+			</div>
+<pre><code>BooleanOption.builder("glow", false)
+    .dependsOn(SHOW_HUD)                        // greyed out while SHOW_HUD is off
+    .enabledWhen(() -&gt; SIZE.getPending() &gt; 5)   // or any other condition
+    .visibleWhen(() -&gt; MODE.getPending() == Mode.ADVANCED)  // hidden instead of greyed out
+    .requiresRestart()                          // shows a hint and a message after saving
+    .onChange(value -&gt; reloadRenderer())        // runs after the value was saved
+    .binding(() -&gt; Settings.glow, value -&gt; Settings.glow = value)  // use an existing field
+    .name(Component.literal("Glow"))            // instead of the translation key
+    .tooltip(Component.literal("Makes it shine"))
+    .hidden()                                   // saved, but not shown in the screen
+    .build();</code></pre>
+
+			<!-- ================================================================ structure -->
+			<h2 id="structure">
+				<span data-lang="de">Kategorien, Gruppen, Texte und Buttons</span>
+				<span data-lang="en">Categories, groups, texts and buttons</span>
+			</h2>
+			<div class="prose">
+				<div data-lang="de">
+					<p>
+						Jede <strong>Kategorie</strong> wird ein Tab. <strong>Gruppen</strong> sind einklappbare Abschnitte innerhalb
+						einer Kategorie. Dazu kommen Textzeilen (<code>label</code>) und Buttons, die Code ausführen (<code>ActionEntry</code>).
+					</p>
+				</div>
+				<div data-lang="en">
+					<p>
+						Every <strong>category</strong> becomes a tab. <strong>Groups</strong> are collapsible sections inside a
+						category. You can also add lines of text (<code>label</code>) and buttons that run code (<code>ActionEntry</code>).
+					</p>
+				</div>
+			</div>
+<pre><code>TabbyConfig.builder("my-mod")
+    .category("general", category -&gt; category
+        .label(Component.translatable("config.my-mod.general.intro"))
+        .add(SHOW_HUD, SIZE)
+        .group("colors", group -&gt; group
+            .description(Component.literal("Everything about colors"))
+            .collapsed()                        // closed when the screen opens
+            .add(COLOR, BACKGROUND)))
+    .category("advanced", category -&gt; category
+        .add(DEBUG)
+        .add(ActionEntry.of(
+            Component.literal("Cache"),
+            Component.literal("Clear"),
+            () -&gt; MyMod.clearCache())))
+    .build();</code></pre>
+
+			<!-- ================================================================ translations -->
+			<h2 id="translations">
+				<span data-lang="de">Übersetzungen</span>
+				<span data-lang="en">Translations</span>
+			</h2>
+			<div class="prose">
+				<div data-lang="de">
+					<p>TabbyLib sucht die Namen automatisch in den Sprachdateien deiner Mod (<code>assets/&lt;modid&gt;/lang/en_us.json</code>). Tooltips und Enum-Namen sind optional.</p>
+				</div>
+				<div data-lang="en">
+					<p>TabbyLib looks up all names in your mod's language files (<code>assets/&lt;modid&gt;/lang/en_us.json</code>). Tooltips and enum names are optional.</p>
+				</div>
+			</div>
+<pre><code>{
+  "config.my-mod.showHud": "Show HUD",
+  "config.my-mod.showHud.tooltip": "Shows or hides the whole HUD.",
+  "config.my-mod.mode.simple": "Simple",
+  "config.my-mod.mode.advanced": "Advanced",
+  "config.my-mod.category.general": "General",
+  "config.my-mod.group.colors": "Colors"
+}</code></pre>
+			<div class="note prose">
+				<div data-lang="de">
+					NeoForge und Forge erlauben keine Bindestriche in Mod-IDs. Heißt deine Mod dort <code>my_mod</code>, auf Fabric aber
+					<code>my-mod</code>, setze <code>.translationId("my-mod")</code> – dann nutzen alle Loader dieselben Sprachdateien.
+				</div>
+				<div data-lang="en">
+					NeoForge and Forge do not allow dashes in mod ids. If your mod is called <code>my_mod</code> there but
+					<code>my-mod</code> on Fabric, set <code>.translationId("my-mod")</code> – then all loaders share the same language files.
+				</div>
+			</div>
+
+			<!-- ================================================================ HUD -->
+			<h2 id="hud">
+				<span data-lang="de">HUD-Elemente</span>
+				<span data-lang="en">HUD elements</span>
+			</h2>
+			<div class="prose">
+				<div data-lang="de">
+					<p>
+						Eine <code>HudPositionOption</code> speichert, wo ein HUD-Element steht. Die Position hängt an einer von neun
+						Ecken bzw. Kanten des Bildschirms und bleibt dort, auch wenn Fenstergröße oder GUI-Skalierung sich ändern.
+						Im Menü öffnet sie einen Editor, in dem Spieler das Element verschieben – mit Einrasten an Rändern, Mitte und Raster.
+					</p>
+				</div>
+				<div data-lang="en">
+					<p>
+						A <code>HudPositionOption</code> stores where a HUD element is. The position is attached to one of nine
+						anchors of the screen and stays there when the window size or GUI scale changes. In the screen it opens an
+						editor where players drag the element around – with snapping to the edges, the center and a grid.
+					</p>
+				</div>
+			</div>
+<pre><code>public static final HudPositionOption POSITION = HudPositionOption.builder("position",
+    HudPosition.of(HudPosition.CENTER, HudPosition.END, 0, -50),   // bottom center, 50 px above the bottom
+    MyHud::preview).build();
+
+// Drawing the HUD
+if (!TabbyLibApi.isHudEditorOpen()) {   // the editor draws its own preview
+    HudPosition position = MyConfig.POSITION.get();
+    int x = position.x(screenWidth, width);
+    int y = position.y(screenHeight, height);
+    draw(graphics, x, y);
+}
+
+// Preview for the editor (uses the unsaved values)
+public static HudPreview preview() {
+    return new HudPreview() {
+        public int width() { return currentWidth(); }
+        public int height() { return currentHeight(); }
+        public void render(GuiGraphicsExtractor graphics, int x, int y) { draw(graphics, x, y); }
+    };
+}
+
+// Open the editor directly, e.g. from a command
+TabbyLibApi.openHudEditor(MyConfig.POSITION);</code></pre>
+			<div class="prose">
+				<div data-lang="de">
+					<p>Auf 1.21.1 und 1.20.1 heißt die Grafikklasse <code>GuiGraphics</code> statt <code>GuiGraphicsExtractor</code>.</p>
+				</div>
+				<div data-lang="en">
+					<p>On 1.21.1 and 1.20.1 the graphics class is called <code>GuiGraphics</code> instead of <code>GuiGraphicsExtractor</code>.</p>
+				</div>
+			</div>
+
+			<!-- ================================================================ advanced -->
+			<h2 id="advanced">
+				<span data-lang="de">Fortgeschritten</span>
+				<span data-lang="en">Advanced</span>
+			</h2>
+			<h3><span data-lang="de">Config-Menü öffnen</span><span data-lang="en">Opening the config screen</span></h3>
+<pre><code>TabbyLibApi.openScreen("my-mod");                 // e.g. from your own command
+Screen screen = TabbyLibApi.createScreen(parent, "my-mod");
+
+// Mod Menu (Fabric)
+public ConfigScreenFactory&lt;?&gt; getModConfigScreenFactory() {
+    return parent -&gt; TabbyLibApi.createScreen(parent, "my-mod");
+}</code></pre>
+			<div class="prose">
+				<div data-lang="de">
+					<p>Auf NeoForge und Forge verbindet TabbyLib den „Config“-Button der Mod-Liste automatisch mit deiner Config.</p>
+				</div>
+				<div data-lang="en">
+					<p>On NeoForge and Forge, TabbyLib connects the "Config" button of the mod list to your config automatically.</p>
+				</div>
+			</div>
+
+			<h3><span data-lang="de">Dateiname, Anzeige und Speichern</span><span data-lang="en">File name, display and saving</span></h3>
+<pre><code>TabbyConfig.builder("my-mod")
+    .fileName("mymod")                          // keeps an existing config/mymod.json
+    .name(Component.literal("My Mod"))          // instead of the name from the mod metadata
+    .icon(Identifier.fromNamespaceAndPath("my-mod", "textures/gui/icon.png"))
+    .onSave(() -&gt; MyMod.reload())               // runs after the file was written
+    ...</code></pre>
+
+			<h3><span data-lang="de">Alte Config-Dateien übernehmen</span><span data-lang="en">Migrating old config files</span></h3>
+			<div class="prose">
+				<div data-lang="de">
+					<p>Hast du vorher eine eigene Config-Datei benutzt, kannst du sie beim Laden umbauen. Gibst du <code>true</code> zurück, wird die Datei danach neu geschrieben.</p>
+				</div>
+				<div data-lang="en">
+					<p>If you used your own config file before, you can convert it while loading. Return <code>true</code> and the file is written again afterwards.</p>
+				</div>
+			</div>
+<pre><code>.migration(json -&gt; {
+    if (!json.has("oldName")) {
+        return false;
+    }
+    json.add("newName", json.remove("oldName"));
+    return true;
+})</code></pre>
+
+			<!-- ================================================================ versions -->
+			<h2 id="versions">
+				<span data-lang="de">Verfügbare Versionen</span>
+				<span data-lang="en">Available versions</span>
+			</h2>
+			<div class="table-scroll">
+				<table class="doc">
+					<thead>
+					<tr>
+						<th>Minecraft</th>
+						<th>Fabric</th>
+						<th>NeoForge</th>
+						<th>Forge</th>
+					</tr>
+					</thead>
+					<tbody>
+					<tr><td>26.1 · 26.1.1 · 26.1.2 · 26.2 · 26.3</td><td>tabbylib</td><td>tabbylib-neoforge</td><td>tabbylib-forge</td></tr>
+					<tr><td>1.21.1</td><td>tabbylib</td><td>tabbylib-neoforge</td><td>tabbylib-forge</td></tr>
+					<tr><td>1.20.1</td><td>–</td><td>–</td><td>tabbylib-forge</td></tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="prose">
+				<div data-lang="de">
+					<p>Die Version ist immer <code>1.0.0+&lt;Minecraft-Version&gt;</code>, zum Beispiel <code>me.avie29.tabbylib:tabbylib-neoforge:1.0.0+1.21.1</code>. Alle Versionen haben dieselben Funktionen und dieselbe API.</p>
+				</div>
+				<div data-lang="en">
+					<p>The version is always <code>1.0.0+&lt;Minecraft version&gt;</code>, for example <code>me.avie29.tabbylib:tabbylib-neoforge:1.0.0+1.21.1</code>. All versions have the same features and API.</p>
+				</div>
+			</div>
+		</main>
+	</div>
+
+	<footer id="footer" class="footer panel"></footer>
+</div>
+</body>
+</html>

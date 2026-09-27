@@ -1,0 +1,799 @@
+/* ==========================================================================
+   avie29.me - Avie29's Minecraft mods, styled after the TabbyLib config screen
+   The Minecraft font is only used on the download buttons.
+   Everything else uses a normal font.
+   ========================================================================== */
+
+@font-face {
+	font-family: "Monocraft";
+	src: url("/assets/fonts/Monocraft.ttf") format("truetype");
+	font-weight: 400;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Monocraft";
+	src: url("/assets/fonts/Monocraft-Bold.ttf") format("truetype");
+	font-weight: 700;
+	font-display: swap;
+}
+
+/* ---------------------------------------------------------------- theme tokens */
+
+:root {
+	--mc-font: "Monocraft", ui-monospace, "Cascadia Mono", Consolas, monospace;
+	--text-font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	--code-font: ui-monospace, "Cascadia Code", "SFMono-Regular", Consolas, Menlo, monospace;
+
+	--bg: #11141b;
+	--bg-glow-1: rgba(242, 165, 65, 0.16);
+	--bg-glow-2: rgba(70, 110, 190, 0.22);
+	--panel-texture: url("/assets/img/panel-dark.png");
+
+	--text: #ffffff;
+	--text-muted: #a8acb4;
+	--text-dim: #858a93;
+	--mc-shadow: 2px 2px 0 rgba(0, 0, 0, 0.55);
+	--accent: #f2a541;
+	--accent-text: #f2a541;
+	--accent-soft: rgba(242, 165, 65, 0.2);
+	--accent-soft-hover: rgba(242, 165, 65, 0.32);
+	--hover: rgba(255, 255, 255, 0.08);
+	--separator: rgba(255, 255, 255, 0.22);
+	--code-bg: rgba(0, 0, 0, 0.45);
+	--code-border: rgba(255, 255, 255, 0.12);
+	--error: #ff6b6b;
+
+	/* Modern controls (top bar dropdowns) */
+	--control-bg: rgba(0, 0, 0, 0.4);
+	--control-bg-hover: rgba(255, 255, 255, 0.08);
+	--control-border: rgba(255, 255, 255, 0.18);
+	--menu-bg: rgba(18, 20, 26, 0.97);
+	--menu-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+
+	color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+	--bg: #dfe6ee;
+	--bg-glow-1: rgba(242, 165, 65, 0.25);
+	--bg-glow-2: rgba(90, 140, 220, 0.25);
+	--panel-texture: url("/assets/img/panel-light.png");
+
+	--text: #1d1f24;
+	--text-muted: #4d525c;
+	--text-dim: #666b75;
+	--mc-shadow: none;
+	--accent: #d9861c;
+	--accent-text: #9c5a06;
+	--accent-soft: rgba(217, 134, 28, 0.18);
+	--accent-soft-hover: rgba(217, 134, 28, 0.3);
+	--hover: rgba(0, 0, 0, 0.06);
+	--separator: rgba(0, 0, 0, 0.18);
+	--code-bg: rgba(255, 255, 255, 0.75);
+	--code-border: rgba(0, 0, 0, 0.12);
+	--error: #b3261e;
+
+	--control-bg: rgba(255, 255, 255, 0.7);
+	--control-bg-hover: rgba(255, 255, 255, 0.95);
+	--control-border: rgba(0, 0, 0, 0.18);
+	--menu-bg: rgba(252, 252, 253, 0.98);
+	--menu-shadow: 0 12px 32px rgba(30, 40, 60, 0.22);
+
+	color-scheme: light;
+}
+
+/* ---------------------------------------------------------------- base */
+
+* {
+	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+}
+
+body {
+	margin: 0;
+	min-height: 100vh;
+	background:
+		radial-gradient(1200px 700px at 12% -10%, var(--bg-glow-1), transparent 60%),
+		radial-gradient(1000px 800px at 110% 110%, var(--bg-glow-2), transparent 60%),
+		var(--bg);
+	background-attachment: fixed;
+	color: var(--text);
+	font-family: var(--text-font);
+	font-size: 16px;
+	line-height: 1.55;
+}
+
+a {
+	color: var(--accent-text);
+}
+
+img {
+	max-width: 100%;
+}
+
+/* Only one language is visible at a time */
+html[lang="de"] [data-lang="en"],
+html[lang="en"] [data-lang="de"] {
+	display: none !important;
+}
+
+/* ---------------------------------------------------------------- layout */
+
+.layout {
+	max-width: 1180px;
+	margin: 0 auto;
+	padding: 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-height: 100vh;
+}
+
+.main {
+	display: grid;
+	grid-template-columns: 250px minmax(0, 1fr);
+	gap: 8px;
+	flex: 1;
+	align-items: start;
+}
+
+/* The TabbyLib box texture, stretched like in game (9-slice) */
+.panel {
+	border: 4px solid transparent;
+	border-image: var(--panel-texture) 4 fill / 4px stretch;
+	image-rendering: pixelated;
+}
+
+/* ---------------------------------------------------------------- top bar */
+
+.topbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px 16px;
+	padding: 8px 12px;
+	position: relative;
+	z-index: 20;
+}
+
+.brand {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	color: var(--text);
+	text-decoration: none;
+	font-weight: 700;
+	font-size: 21px;
+	letter-spacing: 0.2px;
+}
+
+/* The logo is 16x16 pixel art: keep it at a whole multiple so every pixel stays sharp */
+.brand img {
+	width: 32px;
+	height: 32px;
+	image-rendering: pixelated;
+}
+
+.controls {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+}
+
+/* ---------------------------------------------------------------- dropdowns (theme, language) */
+
+.dropdown {
+	position: relative;
+}
+
+.dropdown-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	height: 36px;
+	padding: 0 10px 0 12px;
+	font: inherit;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--text);
+	background: var(--control-bg);
+	border: 1px solid var(--control-border);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background-color 0.15s, border-color 0.15s;
+}
+
+.dropdown-button:hover {
+	background: var(--control-bg-hover);
+}
+
+.dropdown-button:focus-visible,
+.dropdown.open .dropdown-button {
+	border-color: var(--accent);
+	outline: none;
+}
+
+.dropdown-button .chevron {
+	width: 12px;
+	height: 12px;
+	opacity: 0.7;
+	transition: transform 0.15s;
+}
+
+.dropdown.open .dropdown-button .chevron {
+	transform: rotate(180deg);
+}
+
+.dropdown-menu {
+	position: absolute;
+	top: calc(100% + 6px);
+	right: 0;
+	min-width: 180px;
+	margin: 0;
+	padding: 6px;
+	list-style: none;
+	background: var(--menu-bg);
+	border: 1px solid var(--control-border);
+	border-radius: 10px;
+	box-shadow: var(--menu-shadow);
+	backdrop-filter: blur(8px);
+}
+
+.dropdown-menu[hidden] {
+	display: none;
+}
+
+.dropdown-option {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 10px;
+	font-size: 14px;
+	border-radius: 6px;
+	cursor: pointer;
+	user-select: none;
+}
+
+.dropdown-option:hover,
+.dropdown-option.active {
+	background: var(--hover);
+}
+
+.dropdown-option[aria-selected="true"] {
+	color: var(--accent-text);
+	font-weight: 600;
+}
+
+.dropdown-option .check {
+	width: 14px;
+	height: 14px;
+	margin-left: auto;
+	visibility: hidden;
+}
+
+.dropdown-option[aria-selected="true"] .check {
+	visibility: visible;
+}
+
+.icon {
+	width: 18px;
+	height: 18px;
+	flex: none;
+}
+
+.flag {
+	width: 22px;
+	height: 14px;
+	flex: none;
+	object-fit: cover;
+	border-radius: 2px;
+	box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+
+/* ---------------------------------------------------------------- buttons (content), same look as the dropdowns */
+
+.mc-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	min-height: 36px;
+	padding: 0 12px;
+	font: inherit;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--text);
+	text-decoration: none;
+	background: var(--control-bg);
+	border: 1px solid var(--control-border);
+	border-radius: 8px;
+	cursor: pointer;
+	user-select: none;
+	white-space: nowrap;
+	transition: background-color 0.15s, border-color 0.15s;
+}
+
+.mc-button:hover {
+	background: var(--control-bg-hover);
+}
+
+.mc-button:focus-visible {
+	border-color: var(--accent);
+	outline: none;
+}
+
+.mc-button.primary {
+	background: var(--accent-soft);
+	border-color: var(--accent);
+}
+
+.mc-button.primary:hover {
+	background: var(--accent-soft-hover);
+}
+
+.mc-button.primary:focus-visible {
+	box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.mc-button.small {
+	min-height: 32px;
+	padding: 0 10px;
+	font-size: 13px;
+}
+
+/* ---------------------------------------------------------------- mod list (left panel) */
+
+.modlist {
+	padding: 6px;
+	position: sticky;
+	top: 12px;
+}
+
+.modlist-title {
+	margin: 4px 6px 8px;
+	font-size: 13px;
+	color: var(--text-muted);
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+.mod-entry {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 6px 8px 6px 10px;
+	margin-bottom: 2px;
+	color: var(--text);
+	text-decoration: none;
+	border-left: 3px solid transparent;
+}
+
+.mod-entry:hover,
+.mod-entry:focus-visible {
+	background: var(--hover);
+	outline: none;
+}
+
+.mod-entry[aria-current="page"] {
+	background: var(--accent-soft);
+	border-left-color: var(--accent);
+}
+
+.mod-entry img {
+	width: 40px;
+	height: 40px;
+	flex: none;
+}
+
+.mod-entry .name {
+	display: block;
+	font-size: 15px;
+	text-shadow: var(--mc-shadow);
+}
+
+.mod-entry .version {
+	display: block;
+	font-size: 12px;
+	color: var(--text-dim);
+}
+
+/* ---------------------------------------------------------------- content (right panel) */
+
+.content {
+	padding: 16px 20px 24px;
+	min-width: 0;
+}
+
+.content-header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px 16px;
+	padding-bottom: 14px;
+	margin-bottom: 18px;
+	border-bottom: 1px solid var(--separator);
+}
+
+.content-header img {
+	width: 56px;
+	height: 56px;
+}
+
+.content-header img.logo {
+	width: 64px;
+	height: 64px;
+	image-rendering: pixelated;
+}
+
+.content-header h1 {
+	margin: 0;
+	font-size: 28px;
+	line-height: 1.2;
+	color: var(--accent-text);
+}
+
+.content-header .subtitle {
+	margin: 4px 0 0;
+	color: var(--text-muted);
+	font-size: 15px;
+}
+
+.content-header .actions {
+	margin-left: auto;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.content h2 {
+	margin: 28px 0 12px;
+	font-size: 20px;
+	color: var(--accent-text);
+}
+
+.content h2::before {
+	content: "\25BC  ";
+	font-size: 12px;
+	vertical-align: 2px;
+}
+
+.content h3 {
+	margin: 22px 0 8px;
+	font-size: 17px;
+}
+
+.prose {
+	font-size: 16px;
+	line-height: 1.65;
+}
+
+.prose p,
+.prose ul,
+.prose ol {
+	margin: 0 0 12px;
+}
+
+.prose li {
+	margin-bottom: 4px;
+}
+
+code {
+	font-family: var(--code-font);
+	font-size: 0.9em;
+	padding: 1px 5px;
+	background: var(--code-bg);
+	border: 1px solid var(--code-border);
+	border-radius: 4px;
+}
+
+pre {
+	margin: 0 0 14px;
+	padding: 12px 14px;
+	overflow-x: auto;
+	font-family: var(--code-font);
+	font-size: 14px;
+	line-height: 1.55;
+	background: var(--code-bg);
+	border: 1px solid var(--code-border);
+	border-radius: 6px;
+}
+
+pre code {
+	padding: 0;
+	background: none;
+	border: 0;
+	font-size: inherit;
+}
+
+table.doc {
+	width: 100%;
+	margin: 0 0 14px;
+	border-collapse: collapse;
+	font-size: 15px;
+}
+
+table.doc th,
+table.doc td {
+	text-align: left;
+	vertical-align: top;
+	padding: 7px 8px;
+	border-bottom: 1px solid var(--separator);
+}
+
+table.doc th {
+	font-size: 14px;
+	color: var(--text-muted);
+}
+
+.table-scroll {
+	overflow-x: auto;
+}
+
+.note {
+	padding: 10px 12px;
+	margin: 0 0 14px;
+	border-left: 3px solid var(--accent);
+	background: var(--accent-soft);
+}
+
+.placeholder {
+	color: var(--error);
+	font-weight: 700;
+}
+
+.toc {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 0 0 8px;
+}
+
+/* ---------------------------------------------------------------- latest releases (home) */
+
+.release-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+	gap: 10px;
+}
+
+.release-card {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 12px;
+}
+
+.release-card .head {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.release-card .head img {
+	width: 40px;
+	height: 40px;
+}
+
+.release-card .title {
+	font-size: 17px;
+	font-weight: 600;
+}
+
+.release-card .tagline {
+	font-size: 14px;
+	color: var(--text-muted);
+}
+
+.release-card .big-version {
+	font-size: 22px;
+	font-weight: 700;
+	color: var(--accent-text);
+	text-shadow: var(--mc-shadow);
+}
+
+.release-card .meta {
+	font-size: 13px;
+	color: var(--text-muted);
+}
+
+.release-card .mc-button {
+	margin-top: auto;
+	align-self: flex-start;
+}
+
+.badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+}
+
+.badge {
+	display: inline-block;
+	padding: 0 7px;
+	font-size: 12px;
+	line-height: 20px;
+	color: var(--text);
+	background: var(--hover);
+	border: 1px solid var(--separator);
+	border-radius: 4px;
+}
+
+.badge.beta {
+	color: #1d1f24;
+	background: #f2d541;
+	border-color: #b39b16;
+}
+
+.badge.alpha {
+	color: #fff;
+	background: #c0392b;
+	border-color: #7f231a;
+}
+
+/* ---------------------------------------------------------------- downloads (mod pages) */
+
+.loader-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 10px;
+}
+
+.loader-column {
+	padding: 10px;
+	min-width: 0;
+}
+
+.loader-column h3 {
+	margin: 0 0 8px;
+	padding-bottom: 6px;
+	border-bottom: 2px solid var(--accent);
+	text-align: center;
+	font-size: 16px;
+}
+
+.version-row {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 4px;
+	border-bottom: 1px solid var(--separator);
+}
+
+.version-row:last-child {
+	border-bottom: 0;
+}
+
+.version-row:hover {
+	background: var(--hover);
+}
+
+.version-row .mc {
+	font-weight: 700;
+	font-size: 14px;
+	text-shadow: var(--mc-shadow);
+	overflow-wrap: anywhere;
+}
+
+.version-row .mod {
+	font-size: 12px;
+	color: var(--text-dim);
+	overflow-wrap: anywhere;
+}
+
+/* Download buttons: the only place with the Minecraft font */
+.version-row .mc-button {
+	font-family: var(--mc-font);
+	font-weight: 400;
+	text-shadow: var(--mc-shadow);
+}
+
+.empty,
+.loading,
+.error {
+	padding: 10px 4px;
+	font-size: 14px;
+	color: var(--text-muted);
+}
+
+.error {
+	color: var(--error);
+}
+
+.loading::after {
+	content: "";
+	animation: dots 1.2s steps(4, end) infinite;
+}
+
+@keyframes dots {
+	0% { content: ""; }
+	25% { content: "."; }
+	50% { content: ".."; }
+	75% { content: "..."; }
+}
+
+/* ---------------------------------------------------------------- footer */
+
+.footer {
+	padding: 12px 16px;
+	font-size: 12px;
+	color: var(--text-muted);
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.footer .disclaimer {
+	color: var(--text);
+	font-weight: 700;
+	text-shadow: var(--mc-shadow);
+}
+
+.footer .links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 16px;
+}
+
+.footer a {
+	color: var(--accent-text);
+}
+
+/* ---------------------------------------------------------------- small screens */
+
+@media (max-width: 860px) {
+	.loader-grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+@media (max-width: 760px) {
+	.layout {
+		padding: 8px;
+	}
+
+	.main {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.modlist {
+		position: static;
+	}
+
+	.content {
+		padding: 12px;
+	}
+
+	.content-header .actions {
+		margin-left: 0;
+	}
+
+	.dropdown-menu {
+		right: auto;
+		left: 0;
+	}
+
+	.controls .dropdown:last-child .dropdown-menu {
+		right: 0;
+		left: auto;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.loading::after {
+		animation: none;
+		content: "...";
+	}
+
+	.dropdown-button,
+	.dropdown-button .chevron,
+	.mc-button {
+		transition: none;
+	}
+}

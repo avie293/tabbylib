@@ -1,0 +1,96 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "me.avie29.tabbylib",
+    "module": "tabbylib",
+    "version": "1.0.0+26.1",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.7.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 25,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "files": [
+        {
+          "name": "tabbylib-1.0.0+26.1.jar",
+          "url": "tabbylib-1.0.0+26.1.jar",
+          "size": 621554,
+          "sha512": "33fe8b7c2a77637d628317b3de4f0b8993391cff11de11a9325203d1d8f16c303d72e743a49ef342c044c02f07779e01b843f7b47a8acc22d042c8e6a8f3cc7b",
+          "sha256": "3b19c586431094df63d761f240b7f3d45661ba1914f0ef6131b61f18028addf9",
+          "sha1": "7d6eb24b2d9ac7767ae607d887ed4112826f7d18",
+          "md5": "aff9138f12ffd3eb409c60bd656a81c6"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 25,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "net.fabricmc",
+          "module": "fabric-loader",
+          "version": {
+            "requires": "0.19.5"
+          }
+        },
+        {
+          "group": "net.fabricmc.fabric-api",
+          "module": "fabric-api",
+          "version": {
+            "requires": "0.145.1+26.1"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "tabbylib-1.0.0+26.1.jar",
+          "url": "tabbylib-1.0.0+26.1.jar",
+          "size": 621554,
+          "sha512": "33fe8b7c2a77637d628317b3de4f0b8993391cff11de11a9325203d1d8f16c303d72e743a49ef342c044c02f07779e01b843f7b47a8acc22d042c8e6a8f3cc7b",
+          "sha256": "3b19c586431094df63d761f240b7f3d45661ba1914f0ef6131b61f18028addf9",
+          "sha1": "7d6eb24b2d9ac7767ae607d887ed4112826f7d18",
+          "md5": "aff9138f12ffd3eb409c60bd656a81c6"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "tabbylib-1.0.0+26.1-sources.jar",
+          "url": "tabbylib-1.0.0+26.1-sources.jar",
+          "size": 530247,
+          "sha512": "45233ba803a1ee01ccbf2907e748977500c33010ac4771f5dfd098c55b3e355b13bd318a6b8c72340813b17891bf7d5025a775721e1e660b73e9692612259ab9",
+          "sha256": "62e401fd8be2db29273fe6c7f89458ed8bcccb75ea30c190f58beeffbd195726",
+          "sha1": "57dfcf1804dd04197a08d787d99dc7f689b12fde",
+          "md5": "76a928d6f16d5ff23cb4be75c7b956d1"
+        }
+      ]
+    }
+  ]
+}
