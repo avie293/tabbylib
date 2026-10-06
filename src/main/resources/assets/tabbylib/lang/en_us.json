@@ -1,5 +1,5 @@
 {
-  "tabbylib.options_button": "Tabby Config...",
+  "tabbylib.options_button": "Tabby Config",
   "tabbylib.screen.title": "Tabby Config",
   "tabbylib.search": "Search...",
   "tabbylib.search.empty": "No settings match your search.",
@@ -53,5 +53,7 @@
   "config.tabbylib.gridSize": "Grid size",
   "config.tabbylib.showGrid": "Show grid",
   "config.tabbylib.snapDistance": "Snap distance",
-  "config.tabbylib.snapDistance.tooltip": "How close (in pixels) an element has to be to a snap point before it snaps."
+  "config.tabbylib.snapDistance.tooltip": "How close (in pixels) an element has to be to a snap point before it snaps.",
+  "tabbylib.custom_screen.label": "Settings",
+  "tabbylib.button.open_settings": "Open settings"
 }
