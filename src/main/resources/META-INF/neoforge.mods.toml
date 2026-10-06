@@ -1,6 +1,7 @@
 modLoader="javafml"
 loaderVersion="[1,)"
 license="CC-BY-NC-4.0"
+issueTrackerURL="https://github.com/avie293/avie-issues/issues"
 showAsDataPack=false
 
 [[mixins]]
@@ -12,7 +13,7 @@ version="${mod_version}"
 displayName="TabbyLib"
 authors="Avie29"
 description='''Config Library for Avies Mods'''
-logoFile="icon.png"
+logoFile="assets/tabbylib/icon.png"
 
 [[dependencies.${mod_id}]]
 modId="neoforge"
