@@ -9,6 +9,7 @@ import me.avie29.tabbylib.TabbyLib;
 import me.avie29.tabbylib.api.option.Option;
 import me.avie29.tabbylib.platform.ModInfo;
 import me.avie29.tabbylib.platform.Platform;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -54,7 +56,11 @@ public final class TabbyConfig {
 	private final List<Predicate<JsonObject>> migrations;
 	private final @Nullable Component customName;
 	private final @Nullable Identifier customIcon;
+	private final @Nullable Component description;
+	private final @Nullable Function<Screen, Screen> customScreen;
 	private final Map<String, Option<?>> optionsByKey = new LinkedHashMap<>();
+	/** The options of each file. Categories with {@link ConfigCategory#file} get their own file. */
+	private final Map<Path, List<Option<?>>> optionsByFile = new LinkedHashMap<>();
 
 	private TabbyConfig(Builder builder) {
 		this.modId = builder.modId;
@@ -65,13 +71,19 @@ public final class TabbyConfig {
 		this.migrations = List.copyOf(builder.migrations);
 		this.customName = builder.name;
 		this.customIcon = builder.icon;
+		this.description = builder.description;
+		this.customScreen = builder.screen;
 
 		for (ConfigCategory category : this.categories) {
 			category.attach(this);
+			Path categoryFile = category.getFileName() != null
+				? Platform.configDir().resolve(category.getFileName() + ".json")
+				: this.file;
 			for (Option<?> option : category.getOptions()) {
 				if (this.optionsByKey.put(option.getKey(), option) != null) {
 					throw new IllegalStateException("Duplicate option key '" + option.getKey() + "' in config of " + this.modId);
 				}
+				this.optionsByFile.computeIfAbsent(categoryFile, path -> new ArrayList<>()).add(option);
 			}
 		}
 	}
@@ -98,7 +110,7 @@ public final class TabbyConfig {
 		return this.translationId;
 	}
 
-	/** The file the config is saved in: {@code config/<file name>.json}. */
+	/** The main file of the config: {@code config/<file name>.json}. Categories can have own files, see {@link #getFiles()}. */
 	public Path getFile() {
 		return this.file;
 	}
@@ -119,6 +131,19 @@ public final class TabbyConfig {
 	/** The icon set with {@link Builder#icon}, or null to use the icon from the mod metadata. */
 	public @Nullable Identifier getCustomIcon() {
 		return this.customIcon;
+	}
+
+	/** The text set with {@link Builder#description}, or null. */
+	public @Nullable Component getDescription() {
+		return this.description;
+	}
+
+	/**
+	 * The own config screen of the mod set with {@link Builder#screen}, or null when the TabbyLib screen shows
+	 * the options. The function gets the parent screen.
+	 */
+	public @Nullable Function<Screen, Screen> getCustomScreen() {
+		return this.customScreen;
 	}
 
 	/** Name, version and icon of the mod from the loader (fabric.mod.json / mods.toml). */
@@ -186,30 +211,77 @@ public final class TabbyConfig {
 
 	// ---------------------------------------------------------------- file
 
+	/** All files of this config: the main file and the own files of categories, if they have options. */
+	public java.util.Collection<Path> getFiles() {
+		return Collections.unmodifiableCollection(this.optionsByFile.keySet());
+	}
+
 	/**
-	 * Reads the file and replaces the current values. {@link Builder#build()} already does this, call it
+	 * Reads the files and replaces the current values. {@link Builder#build()} already does this, call it
 	 * yourself only to reload a file that was changed while the game is running.
 	 * <p>
 	 * Missing options are written back with their defaults. A file that can not be read is backed up as
-	 * {@code <file name>.json.broken} and replaced by the defaults.
+	 * {@code <file name>.json.broken} and replaced by the defaults. When a category got its own file
+	 * ({@link ConfigCategory#file}) that does not exist yet, its values are taken over from the main file.
 	 */
 	public void load() {
-		if (!Files.exists(this.file)) {
-			this.save();
+		for (Map.Entry<Path, List<Option<?>>> entry : this.optionsByFile.entrySet()) {
+			this.loadFile(entry.getKey(), entry.getValue());
+		}
+	}
+
+	private void loadFile(Path path, List<Option<?>> options) {
+		if (!Files.exists(path)) {
+			// Options that moved from the main file into an own file keep their values
+			JsonObject old = !path.equals(this.file) && Files.exists(this.file) ? this.readJson(this.file) : null;
+			if (old != null) {
+				this.applyMigrations(old);
+				for (Option<?> option : options) {
+					this.loadOption(option, old, this.file);
+				}
+			}
+			this.saveFile(path, options);
 			return;
 		}
 
-		JsonObject json;
-		try (Reader reader = Files.newBufferedReader(this.file, StandardCharsets.UTF_8)) {
+		JsonObject json = this.readJson(path);
+		if (json == null) {
+			TabbyLib.LOGGER.error("Could not read config {}, a backup is created and defaults are used", path);
+			this.backupBrokenFile(path);
+			this.saveFile(path, options);
+			return;
+		}
+
+		if (this.applyMigrations(json)) {
+			this.writeJson(path, json);
+		}
+
+		Set<String> missing = new HashSet<>();
+		for (Option<?> option : options) {
+			if (!this.loadOption(option, json, path)) {
+				missing.add(option.getKey());
+			}
+		}
+
+		// Writes new options (and removes nothing) so the file always shows every setting
+		if (!missing.isEmpty()) {
+			this.saveFile(path, options);
+		}
+	}
+
+	/** The JSON object of a file, or null when it can not be read. */
+	private @Nullable JsonObject readJson(Path path) {
+		try (Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
 			JsonElement parsed = JsonParser.parseReader(reader);
-			json = parsed.isJsonObject() ? parsed.getAsJsonObject() : new JsonObject();
+			return parsed.isJsonObject() ? parsed.getAsJsonObject() : new JsonObject();
 		} catch (Exception e) {
-			TabbyLib.LOGGER.error("Could not read config {}, a backup is created and defaults are used", this.file, e);
-			this.backupBrokenFile();
-			this.save();
-			return;
+			TabbyLib.LOGGER.debug("Could not read {}", path, e);
+			return null;
 		}
+	}
 
+	/** Runs the migrations on a file, true when one of them changed something. */
+	private boolean applyMigrations(JsonObject json) {
 		boolean migrated = false;
 		for (Predicate<JsonObject> migration : this.migrations) {
 			try {
@@ -218,24 +290,10 @@ public final class TabbyConfig {
 				TabbyLib.LOGGER.error("Config migration of {} failed", this.modId, e);
 			}
 		}
-		if (migrated) {
-			this.writeJson(json);
-		}
-
-		Set<String> missing = new HashSet<>();
-		for (Option<?> option : this.optionsByKey.values()) {
-			if (!this.loadOption(option, json)) {
-				missing.add(option.getKey());
-			}
-		}
-
-		// Writes new options (and removes nothing) so the file always shows every setting
-		if (!missing.isEmpty()) {
-			this.save();
-		}
+		return migrated;
 	}
 
-	private <T> boolean loadOption(Option<T> option, JsonObject json) {
+	private <T> boolean loadOption(Option<T> option, JsonObject json, Path path) {
 		if (option.toJson(option.getDefault()) == null) {
 			return true;
 		}
@@ -246,47 +304,48 @@ public final class TabbyConfig {
 		try {
 			option.loadValue(option.fromJson(element));
 		} catch (Exception e) {
-			TabbyLib.LOGGER.warn("Invalid value for '{}' in {}, using the default", option.getKey(), this.file);
+			TabbyLib.LOGGER.warn("Invalid value for '{}' in {}, using the default", option.getKey(), path);
 			option.loadValue(option.getDefault());
 		}
 		return true;
 	}
 
 	/**
-	 * Writes all values to the file and runs the {@link Builder#onSave} listeners.
-	 * Keys in the file that this config does not know are kept.
+	 * Writes all values to the files and runs the {@link Builder#onSave} listeners.
+	 * Keys in the files that this config does not know are kept.
 	 */
 	public void save() {
-		JsonObject json = new JsonObject();
-		// Keeps unknown keys of the old file, e.g. from a newer mod version
-		if (Files.exists(this.file)) {
-			try (Reader reader = Files.newBufferedReader(this.file, StandardCharsets.UTF_8)) {
-				JsonElement old = JsonParser.parseReader(reader);
-				if (old.isJsonObject()) {
-					old.getAsJsonObject().entrySet().forEach(entry -> json.add(entry.getKey(), entry.getValue()));
-				}
-			} catch (Exception ignored) {
-				// The broken file is overwritten below
-			}
+		for (Map.Entry<Path, List<Option<?>>> entry : this.optionsByFile.entrySet()) {
+			this.saveFile(entry.getKey(), entry.getValue());
 		}
-		for (Option<?> option : this.optionsByKey.values()) {
-			writeOption(option, json);
-		}
-
-		this.writeJson(json);
 		this.saveListeners.forEach(Runnable::run);
 	}
 
-	private void writeJson(JsonObject json) {
+	private void saveFile(Path path, List<Option<?>> options) {
+		JsonObject json = new JsonObject();
+		// Keeps unknown keys of the old file, e.g. from a newer mod version
+		if (Files.exists(path)) {
+			JsonObject old = this.readJson(path);
+			if (old != null) {
+				old.entrySet().forEach(entry -> json.add(entry.getKey(), entry.getValue()));
+			}
+		}
+		for (Option<?> option : options) {
+			writeOption(option, json);
+		}
+		this.writeJson(path, json);
+	}
+
+	private void writeJson(Path path, JsonObject json) {
 		try {
-			Files.createDirectories(this.file.getParent());
-			Path temp = this.file.resolveSibling(this.file.getFileName() + ".tmp");
+			Files.createDirectories(path.getParent());
+			Path temp = path.resolveSibling(path.getFileName() + ".tmp");
 			try (Writer writer = Files.newBufferedWriter(temp, StandardCharsets.UTF_8)) {
 				GSON.toJson(json, writer);
 			}
-			Files.move(temp, this.file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+			Files.move(temp, path, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 		} catch (IOException e) {
-			TabbyLib.LOGGER.error("Could not save config {}", this.file, e);
+			TabbyLib.LOGGER.error("Could not save config {}", path, e);
 		}
 	}
 
@@ -297,11 +356,11 @@ public final class TabbyConfig {
 		}
 	}
 
-	private void backupBrokenFile() {
+	private void backupBrokenFile(Path path) {
 		try {
-			Files.copy(this.file, this.file.resolveSibling(this.file.getFileName() + ".broken"), StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(path, path.resolveSibling(path.getFileName() + ".broken"), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
-			TabbyLib.LOGGER.error("Could not back up broken config {}", this.file, e);
+			TabbyLib.LOGGER.error("Could not back up broken config {}", path, e);
 		}
 	}
 
@@ -317,6 +376,8 @@ public final class TabbyConfig {
 		private final List<Predicate<JsonObject>> migrations = new ArrayList<>();
 		private @Nullable Component name;
 		private @Nullable Identifier icon;
+		private @Nullable Component description;
+		private @Nullable Function<Screen, Screen> screen;
 
 		private Builder(String modId) {
 			this.modId = modId;
@@ -352,6 +413,24 @@ public final class TabbyConfig {
 		}
 
 		/** Adds a category you created yourself. */
+		/** Text about the mod, shown in the TabbyLib screen above the button to an own config screen. */
+		public Builder description(Component description) {
+			this.description = description;
+			return this;
+		}
+
+		/**
+		 * Uses an own config screen instead of the TabbyLib option list. The TabbyLib screen then shows the
+		 * {@link #description} and a button that opens it: {@code .screen(parent -> new MyConfigScreen(parent))}.
+		 * <p>
+		 * The options still have to be added to categories, they are saved, loaded and searched as usual.
+		 * The own screen can show them with {@code OptionListWidget} and {@code OptionHost}.
+		 */
+		public Builder screen(Function<Screen, Screen> factory) {
+			this.screen = factory;
+			return this;
+		}
+
 		public Builder category(ConfigCategory category) {
 			this.categories.add(category);
 			return this;
