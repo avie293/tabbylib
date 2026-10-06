@@ -4,9 +4,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import me.avie29.tabbylib.TabbyLibConfig;
 import me.avie29.tabbylib.api.ActionEntry;
 import me.avie29.tabbylib.api.ConfigCategory;
-import me.avie29.tabbylib.api.ConfigEntry;
-import me.avie29.tabbylib.api.LabelEntry;
-import me.avie29.tabbylib.api.OptionGroup;
 import me.avie29.tabbylib.api.TabbyConfig;
 import me.avie29.tabbylib.api.TabbyLibApi;
 import me.avie29.tabbylib.api.option.Option;
@@ -32,8 +29,10 @@ import java.util.Locale;
 
 /**
  * The TabbyLib config screen: mod list on the left, the options of the selected mod on the right (legacy variant).
+ * Mods with their own config screen ({@link TabbyConfig.Builder#screen}) show their description and a button
+ * that opens it instead.
  */
-public class TabbyConfigScreen extends TabbyScreen {
+public class TabbyConfigScreen extends TabbyScreen implements OptionHost {
 	private static final int MARGIN = 8;
 	private static final int GAP = 4;
 	private static final int TOP = 24;
@@ -160,7 +159,7 @@ public class TabbyConfigScreen extends TabbyScreen {
 		if (this.selectedCategory == null || !categories.contains(this.selectedCategory)) {
 			this.selectedCategory = categories.get(0);
 		}
-		if (categories.size() > 1 && this.search.isBlank()) {
+		if (categories.size() > 1 && this.search.isBlank() && this.selected.getCustomScreen() == null) {
 			int x = this.contentX + 6;
 			int available = this.contentWidth - 12;
 			int maxTabWidth = available / categories.size();
@@ -185,6 +184,7 @@ public class TabbyConfigScreen extends TabbyScreen {
 	}
 
 	/** Recreates the option rows, e.g. after changing category, search or collapsing a group. */
+	@Override
 	public void rebuildOptions() {
 		if (this.optionList == null) {
 			return;
@@ -203,28 +203,28 @@ public class TabbyConfigScreen extends TabbyScreen {
 		String query = this.search.trim().toLowerCase(Locale.ROOT);
 		if (!query.isEmpty()) {
 			this.addSearchResults(query);
+		} else if (this.selected.getCustomScreen() != null) {
+			this.addCustomScreenInfo(this.selected);
 		} else if (this.selectedCategory != null) {
-			this.addEntries(this.selectedCategory.getEntries(), false);
+			this.optionList.addEntries(this.selectedCategory.getEntries(), false);
 		}
 		this.optionList.setScroll(scroll);
 	}
 
-	private void addEntries(List<ConfigEntry> entries, boolean indented) {
-		for (ConfigEntry entry : entries) {
-			if (entry instanceof Option<?> option) {
-				if (option.isVisible()) {
-					this.optionList.addOption(option, indented);
-				}
-			} else if (entry instanceof OptionGroup group) {
-				this.optionList.addGroup(group);
-				if (!group.isCollapsed()) {
-					this.addEntries(group.getEntries(), true);
-				}
-			} else if (entry instanceof LabelEntry label) {
-				this.optionList.addText(label.text(), indented);
-			} else if (entry instanceof ActionEntry action) {
-				this.optionList.addAction(action, indented);
-			}
+	/** Description of the mod and a button to its own config screen. */
+	private void addCustomScreenInfo(TabbyConfig config) {
+		Component description = config.getDescription();
+		if (description != null) {
+			this.optionList.addText(description, false);
+		}
+		this.optionList.addAction(ActionEntry.of(Component.translatable("tabbylib.custom_screen.label"),
+			Component.translatable("tabbylib.button.open_settings"), () -> this.openCustomScreen(config)), false);
+	}
+
+	private void openCustomScreen(TabbyConfig config) {
+		var factory = config.getCustomScreen();
+		if (factory != null) {
+			this.openSubScreen(factory.apply(this));
 		}
 	}
 
@@ -326,6 +326,12 @@ public class TabbyConfigScreen extends TabbyScreen {
 		this.statusUntil = Util.getMillis() + 3000;
 	}
 
+	@Override
+	public Screen asScreen() {
+		return this;
+	}
+
+	@Override
 	public void openSubScreen(Screen screen) {
 		this.rememberScroll();
 		McCompat.setScreen(screen);
@@ -364,6 +370,7 @@ public class TabbyConfigScreen extends TabbyScreen {
 
 	// ---------------------------------------------------------------- key binding capture
 
+	@Override
 	public void startKeyCapture(OptionControls.KeyBindControl control) {
 		OptionControls.KeyBindControl previous = this.capturingKey;
 		this.capturingKey = control;
@@ -372,6 +379,7 @@ public class TabbyConfigScreen extends TabbyScreen {
 		}
 	}
 
+	@Override
 	public boolean isCapturing(OptionControls.KeyBindControl control) {
 		return this.capturingKey == control;
 	}
