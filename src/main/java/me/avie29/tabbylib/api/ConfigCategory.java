@@ -17,6 +17,7 @@ public class ConfigCategory {
 	private final String key;
 	private final List<ConfigEntry> entries = new ArrayList<>();
 	private @Nullable Component name;
+	private @Nullable String fileName;
 	private @Nullable TabbyConfig config;
 
 	public ConfigCategory(String key) {
@@ -44,6 +45,21 @@ public class ConfigCategory {
 	public ConfigCategory name(Component name) {
 		this.name = name;
 		return this;
+	}
+
+	/**
+	 * Saves the options of this category in their own file, {@code config/<file name>.json}, instead of the
+	 * file of the config. A slash puts it into a folder: {@code file("my-mod/hud")} is
+	 * {@code config/my-mod/hud.json}. Values from the old file are taken over the first time.
+	 */
+	public ConfigCategory file(String fileName) {
+		this.fileName = fileName;
+		return this;
+	}
+
+	/** The own file name set with {@link #file}, or null when the options are in the file of the config. */
+	public @Nullable String getFileName() {
+		return this.fileName;
 	}
 
 	/** Adds an option, group, label or action. */
