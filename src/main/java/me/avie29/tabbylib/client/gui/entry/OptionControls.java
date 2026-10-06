@@ -13,8 +13,8 @@ import me.avie29.tabbylib.api.option.StringListOption;
 import me.avie29.tabbylib.api.option.StringOption;
 import me.avie29.tabbylib.client.gui.ColorPickerScreen;
 import me.avie29.tabbylib.client.gui.HudEditorScreen;
+import me.avie29.tabbylib.client.gui.OptionHost;
 import me.avie29.tabbylib.client.gui.StringListScreen;
-import me.avie29.tabbylib.client.gui.TabbyConfigScreen;
 import me.avie29.tabbylib.client.gui.widget.ColorSwatch;
 import me.avie29.tabbylib.client.gui.widget.TabbyButton;
 import me.avie29.tabbylib.client.gui.widget.ValueSlider;
@@ -43,7 +43,7 @@ public final class OptionControls {
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	public static OptionControl create(Option<?> option, TabbyConfigScreen screen) {
+	public static OptionControl create(Option<?> option, OptionHost screen) {
 		Font font = Minecraft.getInstance().font;
 		if (option instanceof BooleanOption bool) {
 			return new BooleanControl(bool);
@@ -86,12 +86,12 @@ public final class OptionControls {
 		if (option instanceof StringListOption list) {
 			return new ButtonControl(
 				() -> Component.translatable("tabbylib.list.edit", list.getPending().size()),
-				() -> screen.openSubScreen(new StringListScreen(screen, list)));
+				() -> screen.openSubScreen(new StringListScreen(screen.asScreen(), list)));
 		}
 		if (option instanceof HudPositionOption hud) {
 			return new ButtonControl(
 				() -> Component.translatable("tabbylib.hud.edit"),
-				() -> screen.openSubScreen(new HudEditorScreen(screen, hud)));
+				() -> screen.openSubScreen(new HudEditorScreen(screen.asScreen(), hud)));
 		}
 		// Unknown option type from another mod: show the value read only
 		ButtonControl fallback = new ButtonControl(() -> Component.literal(describe(option)), () -> {
@@ -267,7 +267,7 @@ public final class OptionControls {
 		private final ColorSwatch swatch;
 		private final TextControl<Integer> text;
 
-		ColorControl(Font font, ColorOption option, TabbyConfigScreen screen) {
+		ColorControl(Font font, ColorOption option, OptionHost screen) {
 			this.option = option;
 			this.text = new TextControl<>(font, option, value -> ColorOption.toHex(value, option.hasAlpha()), input -> {
 				Integer parsed = ColorOption.parseHex(input);
@@ -278,7 +278,7 @@ public final class OptionControls {
 				return option.hasAlpha() ? parsed : parsed | 0xFF000000;
 			});
 			this.swatch = new ColorSwatch(20, option::getPending, () -> screen.openSubScreen(
-				new ColorPickerScreen(screen, option.getName(), option.getPending(), option.hasAlpha(), picked -> {
+				new ColorPickerScreen(screen.asScreen(), option.getName(), option.getPending(), option.hasAlpha(), picked -> {
 					option.setPending(picked);
 					this.refresh();
 				})));
@@ -306,9 +306,9 @@ public final class OptionControls {
 	public static final class KeyBindControl implements OptionControl {
 		private final KeyBindOption option;
 		private final TabbyButton button;
-		private final TabbyConfigScreen screen;
+		private final OptionHost screen;
 
-		KeyBindControl(KeyBindOption option, TabbyConfigScreen screen) {
+		KeyBindControl(KeyBindOption option, OptionHost screen) {
 			this.option = option;
 			this.screen = screen;
 			this.button = new TabbyButton(0, 20, Component.empty(), () -> {
