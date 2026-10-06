@@ -18,7 +18,7 @@
 ### Changed
 - `OptionListWidget` and the option controls work with any `OptionHost` instead of only the TabbyLib screen.
 - `OptionListWidget.clip` is public, for cutting texts to a width with "..." in own screens.
-- The maven repository moved to https://avie.cc/maven, the README and build scripts point there now.
+- The maven repository moved to https://avie.cc/maven.
 
 ## 1.0.0
 - First release: config screen with mod list, categories, groups, search, all option types (toggle, numbers,
