@@ -1,6 +1,7 @@
 modLoader="javafml"
 loaderVersion="${forge_version_range}"
 license="CC-BY-NC-4.0"
+issueTrackerURL="https://github.com/avie293/avie-issues/issues"
 
 [[mods]]
 modId="${mod_id}"
