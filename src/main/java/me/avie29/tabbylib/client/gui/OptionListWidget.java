@@ -3,6 +3,8 @@ package me.avie29.tabbylib.client.gui;
 import com.mojang.blaze3d.platform.InputConstants;
 import me.avie29.tabbylib.TabbyLibConfig;
 import me.avie29.tabbylib.api.ActionEntry;
+import me.avie29.tabbylib.api.ConfigEntry;
+import me.avie29.tabbylib.api.LabelEntry;
 import me.avie29.tabbylib.api.OptionGroup;
 import me.avie29.tabbylib.api.option.Option;
 import me.avie29.tabbylib.client.gui.entry.OptionControl;
@@ -31,18 +33,44 @@ import net.minecraft.util.FormattedCharSequence;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Scrollable list of option rows on the right side of the config screen (legacy variant, fixed row height). */
+/**
+ * Scrollable list of option rows on the right side of the config screen (legacy variant, fixed row height).
+ * Mods can put it into their own screen through {@link OptionHost} and fill it with {@link #addEntries}.
+ */
 public class OptionListWidget extends TabbyList<OptionListWidget.Row> {
 	public static final int ROW_HEIGHT = 24;
 	private static final int INDENT = 10;
 	private static final int RESET_WIDTH = 20;
 	private static final int LINES_PER_ROW = 2;
 
-	private final TabbyConfigScreen screen;
+	private final OptionHost screen;
 
-	public OptionListWidget(Minecraft minecraft, TabbyConfigScreen screen, int x, int y, int width, int height) {
+	public OptionListWidget(Minecraft minecraft, OptionHost screen, int x, int y, int width, int height) {
 		super(minecraft, x, y, width, height, ROW_HEIGHT);
 		this.screen = screen;
+	}
+
+	/**
+	 * Adds the entries of a category or group: options, collapsible groups, labels and actions.
+	 * Hidden options are skipped, the entries of collapsed groups too.
+	 */
+	public void addEntries(List<ConfigEntry> entries, boolean indented) {
+		for (ConfigEntry entry : entries) {
+			if (entry instanceof Option<?> option) {
+				if (option.isVisible()) {
+					this.addOption(option, indented);
+				}
+			} else if (entry instanceof OptionGroup group) {
+				this.addGroup(group);
+				if (!group.isCollapsed()) {
+					this.addEntries(group.getEntries(), true);
+				}
+			} else if (entry instanceof LabelEntry label) {
+				this.addText(label.text(), indented);
+			} else if (entry instanceof ActionEntry action) {
+				this.addAction(action, indented);
+			}
+		}
 	}
 
 	public void addOption(Option<?> option, boolean indented) {
@@ -326,7 +354,8 @@ public class OptionListWidget extends TabbyList<OptionListWidget.Row> {
 		return option.formatValue(option.getDefault());
 	}
 
-	static FormattedCharSequence clip(Font font, Component text, int width) {
+	/** Cuts a text to the width, with "..." at the end when it is too long. */
+	public static FormattedCharSequence clip(Font font, Component text, int width) {
 		if (font.width(text) <= width) {
 			return text.getVisualOrderText();
 		}
