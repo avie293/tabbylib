@@ -72,3 +72,13 @@ publishing {
 		}
 	}
 }
+
+// Public maven repository (public/maven of the website, https://avie.cc/maven). Filled by "gradlew publish".
+publishing {
+	repositories {
+		maven {
+			name = "website"
+			url = rootProject.file("../../TabbyLib-Website/public/maven").toURI()
+		}
+	}
+}
