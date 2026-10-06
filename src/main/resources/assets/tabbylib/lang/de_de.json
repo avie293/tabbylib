@@ -53,5 +53,7 @@
   "config.tabbylib.gridSize": "Rastergröße",
   "config.tabbylib.showGrid": "Raster anzeigen",
   "config.tabbylib.snapDistance": "Einrast-Abstand",
-  "config.tabbylib.snapDistance.tooltip": "Wie nah (in Pixeln) ein Element an einem Einrastpunkt sein muss, damit es einrastet."
+  "config.tabbylib.snapDistance.tooltip": "Wie nah (in Pixeln) ein Element an einem Einrastpunkt sein muss, damit es einrastet.",
+  "tabbylib.custom_screen.label": "Einstellungen",
+  "tabbylib.button.open_settings": "Einstellungen öffnen"
 }
