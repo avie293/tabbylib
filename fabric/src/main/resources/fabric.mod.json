@@ -17,7 +17,7 @@
 	"environment": "client",
 	"entrypoints": {
 		"client": [
-			"cc.avie.tabbylib.TabbyLib"
+			"cc.avie.tabbylib.fabric.TabbyLibFabric"
 		],
 		"modmenu": [
 			"cc.avie.tabbylib.compat.ModMenuCompat"

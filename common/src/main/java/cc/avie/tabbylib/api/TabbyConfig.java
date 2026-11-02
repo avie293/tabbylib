@@ -2,6 +2,7 @@ package cc.avie.tabbylib.api;
 
 import cc.avie.tabbylib.TabbyLib;
 import cc.avie.tabbylib.api.option.Option;
+import cc.avie.tabbylib.platform.Platform;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -49,7 +50,7 @@ public final class TabbyConfig {
 	private final Map<String, Option<?, ?>> optionsByKey = new LinkedHashMap<>();
 	/** The options of each file. */
 	private final Map<Path, List<Option<?, ?>>> optionsByFile = new LinkedHashMap<>();
-	/** Read from fabric.mod.json on first use, the metadata does not change while the game runs. */
+	/** Read from the mod metadata on first use, the metadata does not change while the game runs. */
 	private @Nullable Component displayName;
 	private @Nullable String version;
 
@@ -84,7 +85,7 @@ public final class TabbyConfig {
 
 	/** {@code config/tabbylib}: TabbyLib keeps the files of all mods in its own folder. */
 	public static Path configDir() {
-		return FabricLoader.getInstance().getConfigDir().resolve(TabbyLib.MOD_ID);
+		return Platform.get().configDir().resolve(TabbyLib.MOD_ID);
 	}
 
 	public String getModId() {
@@ -101,26 +102,26 @@ public final class TabbyConfig {
 		return this.file;
 	}
 
-	/** Name from fabric.mod.json, unless set with {@link Builder#name}. */
+	/** Name from fabric.mod.json or neoforge.mods.toml, unless set with {@link Builder#name}. */
 	public Component getDisplayName() {
 		if (this.customName != null) {
 			return this.customName;
 		}
 		if (this.displayName == null) {
-			this.displayName = Component.literal(this.modContainer().map(mod -> mod.getMetadata().getName()).orElse(this.modId));
+			this.displayName = Component.literal(Platform.get().modName(this.modId).orElse(this.modId));
 		}
 		return this.displayName;
 	}
 
-	/** Version from fabric.mod.json, empty when the mod is unknown. */
+	/** Version from fabric.mod.json or neoforge.mods.toml, empty when the mod is unknown. */
 	public String getVersion() {
 		if (this.version == null) {
-			this.version = this.modContainer().map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse("");
+			this.version = Platform.get().modVersion(this.modId).orElse("");
 		}
 		return this.version;
 	}
 
-	/** The icon set with {@link Builder#icon}, or null to use the icon from fabric.mod.json. */
+	/** The icon set with {@link Builder#icon}, or null to use the icon from the mod metadata. */
 	public @Nullable Identifier getCustomIcon() {
 		return this.customIcon;
 	}
@@ -135,6 +136,12 @@ public final class TabbyConfig {
 		return this.customScreen;
 	}
 
+	/**
+	 * The Fabric mod of this config.
+	 *
+	 * @deprecated Only works on Fabric and fails on other loaders, use {@link #getDisplayName()} and {@link #getVersion()}.
+	 */
+	@Deprecated
 	public Optional<ModContainer> modContainer() {
 		return FabricLoader.getInstance().getModContainer(this.modId);
 	}
@@ -206,7 +213,7 @@ public final class TabbyConfig {
 
 	/** Files used to be directly in {@code config/}. */
 	private static void moveFromOldLocation(Path path) {
-		Path old = FabricLoader.getInstance().getConfigDir().resolve(configDir().relativize(path));
+		Path old = Platform.get().configDir().resolve(configDir().relativize(path));
 		if (Files.exists(path) || !Files.exists(old)) {
 			return;
 		}

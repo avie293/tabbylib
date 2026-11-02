@@ -1,0 +1,25 @@
+plugins {
+	id 'multiloader-loader'
+	id 'net.neoforged.moddev'
+}
+
+neoForge {
+	version = neoforge_version
+
+	runs {
+		client {
+			client()
+		}
+	}
+
+	mods {
+		"${mod_id}" {
+			sourceSet sourceSets.main
+		}
+	}
+}
+
+dependencies {
+	// The common sources contain TabbyConfig#modContainer for Fabric mods, it is never called on NeoForge
+	compileOnly "net.fabricmc:fabric-loader:${fabric_loader_version}"
+}

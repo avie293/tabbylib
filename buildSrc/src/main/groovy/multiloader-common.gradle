@@ -1,0 +1,83 @@
+// Setup shared by common, fabric and neoforge
+plugins {
+	id 'java-library'
+	id 'maven-publish'
+}
+
+base {
+	archivesName = "${mod_id}-${project.name}"
+}
+
+repositories {
+	maven {
+		name = 'Fabric'
+		url = 'https://maven.fabricmc.net/'
+		content {
+			includeGroupAndSubgroups 'net.fabricmc'
+		}
+	}
+	maven {
+		name = 'TerraformersMC'
+		url = 'https://maven.terraformersmc.com/releases/'
+		content {
+			includeGroup 'com.terraformersmc'
+		}
+	}
+	mavenCentral()
+}
+
+java {
+	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.toVersion(java_version)
+	targetCompatibility = JavaVersion.toVersion(java_version)
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.encoding = 'UTF-8'
+	it.options.release = java_version as int
+}
+
+jar {
+	def modId = mod_id
+	inputs.property 'modId', modId
+
+	from(rootProject.file('LICENSE')) {
+		rename { "${it}_$modId" }
+	}
+}
+
+processResources {
+	def properties = [
+		version          : version,
+		mod_id           : mod_id,
+		mod_name         : mod_name,
+		mod_description  : mod_description,
+		mod_author       : mod_author,
+		mod_license      : mod_license,
+		minecraft_version: minecraft_version,
+		neoforge_version : neoforge_version,
+		loader_version   : fabric_loader_version
+	]
+	inputs.properties properties
+
+	filesMatching(['fabric.mod.json', 'META-INF/neoforge.mods.toml']) {
+		expand properties
+	}
+}
+
+// Public maven repository (public/maven of the website, https://avie.cc/maven). Filled by "gradlew publish".
+publishing {
+	publications {
+		register('mavenJava', MavenPublication) {
+			artifactId = base.archivesName.get()
+			from components.java
+		}
+	}
+	repositories {
+		maven {
+			name = 'website'
+			url = rootProject.file('../../003_web_projects/001_AVIE_CC/public/maven').toURI()
+		}
+	}
+}

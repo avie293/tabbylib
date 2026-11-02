@@ -2,16 +2,14 @@ package cc.avie.tabbylib.client.gui;
 
 import cc.avie.tabbylib.TabbyLib;
 import cc.avie.tabbylib.api.TabbyConfig;
+import cc.avie.tabbylib.platform.Platform;
 import com.mojang.blaze3d.platform.NativeImage;
-import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -27,18 +25,16 @@ public final class ModIcons {
 		if (config.getCustomIcon() != null) {
 			return config.getCustomIcon();
 		}
-		return CACHE.computeIfAbsent(config.getModId(), modId -> config.modContainer().flatMap(ModIcons::load)).orElse(null);
+		return CACHE.computeIfAbsent(config.getModId(), ModIcons::load).orElse(null);
 	}
 
-	private static Optional<Identifier> load(ModContainer mod) {
-		String id = mod.getMetadata().getId();
-		Optional<Path> file = mod.getMetadata().getIconPath(128).flatMap(mod::findPath);
-		if (file.isEmpty()) {
-			return Optional.empty();
-		}
+	private static Optional<Identifier> load(String id) {
 		try {
 			NativeImage image;
-			try (InputStream input = Files.newInputStream(file.get())) {
+			try (InputStream input = Platform.get().openModIcon(id)) {
+				if (input == null) {
+					return Optional.empty();
+				}
 				image = NativeImage.read(input);
 			}
 			String safeId = id.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_.-]", "_");
