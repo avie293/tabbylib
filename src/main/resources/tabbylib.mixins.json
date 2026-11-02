@@ -1,0 +1,15 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "cc.avie.tabbylib.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"OptionsScreenMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
