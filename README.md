@@ -15,6 +15,8 @@ Features include:
 
 The overview opens through the **Tabby Config** button in the options menu or with `/tabbylib`. The settings of a single mod also open with `/tabbylib <mod>`, through Mod Menu on Fabric and through the mod list on NeoForge.
 
+Pre 2.0.0 versions: [Avies Archive](https://avie.cc/archive/)
+
 Bugs and crashes can be reported in the [issue tracker](https://github.com/avie293/avie-issues/issues) by selecting **TabbyLib** as the project.
 
 ## Documentation
