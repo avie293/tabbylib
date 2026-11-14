@@ -1,7 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "[1,)"
 license = "${mod_license}"
-issueTrackerURL = "https://github.com/avie293/avie-issues/issues"
+issueTrackerURL = "${mod_issues}"
 
 [[mods]]
 modId = "${mod_id}"
@@ -9,22 +9,22 @@ version = "${version}"
 displayName = "${mod_name}"
 description = '''${mod_description}'''
 authors = "${mod_author}"
-displayURL = "https://avie.cc/"
-iconFile = "assets/tabbylib/icon.png"
+logoFile = "assets/${mod_id}/icon.png"
+displayURL = "${mod_homepage}"
 
 [[mixins]]
-config = "tabbylib.mixins.json"
+config = "${mod_id}.mixins.json"
+
+[[dependencies.${mod_id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft_version_range}"
+ordering = "NONE"
+side = "CLIENT"
 
 [[dependencies.${mod_id}]]
 modId = "neoforge"
 type = "required"
 versionRange = "[${neoforge_version},)"
-ordering = "NONE"
-side = "CLIENT"
-
-[[dependencies.${mod_id}]]
-modId = "minecraft"
-type = "required"
-versionRange = "[${minecraft_version},26.4)"
 ordering = "NONE"
 side = "CLIENT"

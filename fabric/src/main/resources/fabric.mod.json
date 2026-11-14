@@ -1,19 +1,19 @@
 {
 	"schemaVersion": 1,
-	"id": "tabbylib",
+	"id": "${mod_id}",
 	"version": "${version}",
-	"name": "TabbyLib",
-	"description": "Config Library for Avies Mods",
+	"name": "${mod_name}",
+	"description": "${mod_description}",
 	"authors": [
-		"Avie"
+		"${mod_author}"
 	],
 	"contact": {
-		"homepage": "https://avie.cc/",
-		"sources": "https://github.com/avie293/tabbylib/",
-		"issues": "https://github.com/avie293/avie-issues/issues"
+		"homepage": "${mod_homepage}",
+		"sources": "${mod_sources}",
+		"issues": "${mod_issues}"
 	},
-	"license": "Avie Terms & Conditions 1.0",
-	"icon": "assets/tabbylib/icon.png",
+	"license": "${mod_license}",
+	"icon": "assets/${mod_id}/icon.png",
 	"environment": "client",
 	"entrypoints": {
 		"client": [
@@ -24,13 +24,13 @@
 		]
 	},
 	"mixins": [
-		"tabbylib.mixins.json"
+		"${mod_id}.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=0.19.5",
-		"minecraft": "~26.3",
-		"java": ">=25",
-		"fabric-api": "*"
+		"fabric-api": "*",
+		"fabricloader": ">=${fabric_loader_version}",
+		"minecraft": "~${minecraft_version}",
+		"java": ">=${java_version}"
 	},
 	"custom": {
 		"modmenu": {
@@ -38,7 +38,7 @@
 				"library"
 			],
 			"links": {
-				"avie29.discord": "https://discord.gg/57TZ8BJvd9"
+				"avie.discord": "https://discord.gg/57TZ8BJvd9"
 			}
 		}
 	}

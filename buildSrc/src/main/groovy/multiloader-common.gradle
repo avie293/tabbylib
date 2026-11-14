@@ -49,15 +49,20 @@ jar {
 
 processResources {
 	def properties = [
-		version          : version,
-		mod_id           : mod_id,
-		mod_name         : mod_name,
-		mod_description  : mod_description,
-		mod_author       : mod_author,
-		mod_license      : mod_license,
-		minecraft_version: minecraft_version,
-		neoforge_version : neoforge_version,
-		loader_version   : fabric_loader_version
+		version                : version,
+		mod_id                 : mod_id,
+		mod_name               : mod_name,
+		mod_description        : mod_description,
+		mod_author             : mod_author,
+		mod_homepage           : mod_homepage,
+		mod_sources            : mod_sources,
+		mod_issues             : mod_issues,
+		mod_license            : mod_license,
+		java_version           : java_version,
+		minecraft_version      : minecraft_version,
+		minecraft_version_range: minecraft_version_range,
+		neoforge_version       : neoforge_version,
+		fabric_loader_version  : fabric_loader_version
 	]
 	inputs.properties properties
 
